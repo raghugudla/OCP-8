@@ -1,0 +1,12 @@
+# ignore an entire directory
+
+/out
+
+/.idea
+
+
+# ignore a file type
+
+*.class
+
+OCP8.iml
