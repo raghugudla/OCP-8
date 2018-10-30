@@ -8,7 +8,7 @@ public class Box<T> {
 
     private T t; // T stands for "Type"
 
-    private void set(T t) {
+    public void set(T t) {
         this.t = t;
     }
 
