@@ -1,0 +1,639 @@
+Chapter 7: Concurrency
+----------------------
+
+Introducing Runnable
+
+@FunctionalInterface public interface Runnable {
+void run();
+}
+
+#####################################################################
+Creating Threads with the ExecutorService
+#####################################################################
+
+Introducing the Single-Thread ExecutorService
+---------------------------------------------
+
+ExecutorService service = Executors.newSingleThreadExecutor();
+			
+With a single-thread executor, results are guaranteed to be executed in the order in which
+they are added to the executor service.
+
+Shutting Down a Thread Executor
+
+Be aware that shutdown() does not actually stop any tasks that
+have already been submitted to the thread executor. 
+
+shutdownNow()
+returns a List<Runnable> of tasks that were submitted to the thread executor but that were
+never started.
+
+Submitting Tasks
+-----------------
+
+The execute() method takes a Runnable lambda expression or instance
+and completes the task asynchronously. Because the return type of the method is void
+
+submit() returns a Future object that can be used to determine if the task is complete.
+It can also be used to return a generic result object after the task has been completed.
+
+1) void execute(Runnable command) Executes a Runnable task at some
+point in the future
+
+2) Future<?> submit(Runnable task) Executes a Runnable task at some
+point in the future and returns a Future representing the task
+
+Since the return type of
+Runnable.run() is void, the get() method always returns null
+
+3) <T> Future<T> submit(Callable<T> task) Executes a Callable task at some
+point in the future and returns a Future representing the pending results of the task
+
+4) <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException
+Executes the given tasks, synchronously returning the results of all tasks
+as a Collection of Future objects, in the same order they were in the original collection
+
+5) <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException,ExecutionException
+Executes the given tasks, synchronously returning the result of one of
+finished tasks, cancelling any unfinished tasks
+
+Submitting Task Collections
+---------------------------
+
+Even though Future.isDone() returns true for each
+element in the returned List, a task could have completed normally or thrown an exception.
+
+Finally, the invokeAll() method will wait indefinitely until all tasks are complete,
+while the invokeAny() method will wait indefinitely until at least one task completes.
+
+The ExecutorService interface also includes overloaded versions of invokeAll() and
+invokeAny() that take a time-out value and TimeUnit parameter.
+
+Waiting for Results
+-------------------
+
+The Future class includes methods that are useful in determining the state of a task
+
+1) boolean isDone() Returns true if the task was completed, threw an exception, or was cancelled.
+
+2) boolean isCancelled() Returns true if the task was cancelled before it complete normally.
+
+3) boolean cancel() Attempts to cancel execution of the task.
+
+4) V get() Retrieves the result of a task, waiting endlessly if it is not yet available.
+
+5) V get(long timeout, TimeUnit unit)
+Retrieves the result of a task, waiting the specified amount
+of time. If the result is not ready by the time the time-out is
+reached, a checked TimeoutException will be thrown.
+
+Introducing Callable
+--------------------
+@FunctionalInterface 
+public interface Callable<V> {
+	V call() throws Exception;
+}
+
+Scheduling Tasks - ScheduledExecutorService
+-------------------------------------------
+
+ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
+
+1) schedule(Callable<V> callable, long delay, TimeUnit unit)
+Creates and executes a Callable task after the given delay
+
+2) schedule(Runnable command, long delay, TimeUnit unit)
+Creates and executes a Runnable task after the given delay
+
+3) scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit)
+Creates and executes a Runnable task after the given 
+initial delay, creating a new task every period value that passes.
+
+4) scheduleAtFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit)
+Creates and executes a Runnable task after the given initial delay and subsequently with the given delay
+between the termination of one execution and the commencement of the next
+
+Increasing Concurrency with Pools
+---------------------------------
+
+A thread pool is a group of pre-instantiated
+reusable threads that are available to perform a set of arbitrary tasks.
+
+Executors methods:
+
+1) newSingleThreadExecutor() ExecutorService 
+Creates a single-threaded executor that uses a single worker thread operating
+off an unbounded queue. Results are processed sequentially in the order in
+which they are submitted. 
+
+2) newSingleThreadScheduledExecutor() ScheduledExecutorService
+Creates a single-threaded executor that can schedule commands to run after a
+given delay or to execute periodically.
+
+3) newCachedThreadPool() ExecutorService 
+Creates a thread pool that creates new threads as needed, but will reuse previously
+constructed threads when they are available.
+
+4) newFixedThreadPool(int nThreads) ExecutorService 
+Creates a thread pool that reuses a fixed number of threads operating off a
+shared unbounded queue. 
+
+5) newScheduledThreadPool(int nThreads) ScheduledExecutorService
+Creates a thread pool that can schedule commands to run after a given delay or
+to execute periodically.
+
+#####################################################################
+Synchronizing Data Access
+#####################################################################
+
+Java added a new java.util.concurrent.atomic
+package to help coordinate access to primitive values and object references.
+
+AtomicBoolean A boolean value that may be updated atomically
+AtomicInteger An int value that may be updated atomically
+AtomicIntegerArray An int array in which elements may be updated atomically
+AtomicLong A long value that may be updated atomically
+AtomicLongArray A long array in which elements may be updated atomically
+AtomicReference A generic object reference that may be updated atomically
+AtomicReferenceArray An array of generic object references in which elements may be updated atomically
+
+#####################################################################
+Using Concurrent Collections
+#####################################################################
+
+Concurrent collection classes
+Class Name				Java Collections Framework Interface Elements Ordered? Sorted? Blocking?
+ConcurrentHashMap 		ConcurrentMap 				No No No
+ConcurrentLinkedDeque 	Deque 						Yes No No
+ConcurrentLinkedQueue 	Queue 						Yes No No
+ConcurrentSkipListMap 	ConcurrentMap				Yes Yes No
+						SortedMap
+						NavigableMap
+
+ConcurrentSkipListSet 	SortedSet					Yes Yes No
+						NavigableSet
+
+CopyOnWriteArrayList 	List 						Yes No No
+CopyOnWriteArraySet 	Set 						No No No
+
+LinkedBlockingDeque 	BlockingQueue				Yes No Yes
+						BlockingDeque
+
+LinkedBlockingQueue 	BlockingQueue 				Yes No Yes
+
+The BlockingQueue is just like a regular Queue, except that it includes methods that will wait a specific amount of
+time to complete an operation.
+
+offer(E e, long timeout, TimeUnit unit)
+Adds item to the queue waiting the specified time,
+returning false if time elapses before space is available
+
+poll(long timeout, TimeUnit unit)
+Retrieves and removes an item from the queue, waiting
+the specified time, returning null if the time elapses
+before the item is available
+
+can each throw a checked InterruptedException,
+as they can be interrupted before they finish waiting for a result; therefore they must be
+properly caught.
+
+The BlockingDeque interface extends Deque much in the same way that BlockingQueue extends Queue.
+
+offerFirst(E e, long timeout, TimeUnit unit)
+Adds an item to the front of the queue, waiting a
+specified time, returning false if time elapses before
+space is available
+
+offerLast(E e, long timeout, TimeUnit unit)
+Adds an item to the tail of the queue, waiting a specified
+time, returning false if time elapses before space is
+available
+
+pollFirst(long timeout, TimeUnit unit)
+Retrieves and removes an item from the front of the
+queue, waiting the specified time, returning null if the
+time elapses before the item is available
+
+pollLast(long timeout, TimeUnit unit)
+Retrieves and removes an item from the tail of the
+queue, waiting the specified time, returning null if the
+time elapses before the item is available
+
+CopyOnWriteArrayList and CopyOnWriteArraySet copy all of their elements to a new underlying structure anytime an element is
+added, modified, or removed from the collection. By a modified element, we mean that the
+reference in the collection is changed. Modifying the actual contents of the collection will
+not cause a new structure to be allocated.
+
+Any iterator established prior to a modification will not see the
+changes, but instead it will iterate over the original elements prior to the modification.
+
+Obtaining Synchronized Collections
+----------------------------------
+
+if you are given an existing collection that is not a concurrent class and 
+need to access it among multiple threads, you can wrap it using the methods: 
+
+synchronizedCollection(Collection<T> c)
+synchronizedList(List<T> list)
+
+synchronizedSet(Set<T> s)
+synchronizedNavigableSet(NavigableSet<T> s)
+synchronizedSortedSet(SortedSet<T> s)
+
+synchronizedMap(Map<K,V> m)
+synchronizedNavigableMap(NavigableMap<K,V> m)
+synchronizedSortedMap(SortedMap<K,V> m)
+
+While the methods synchronize access to the data elements, such as
+the get() and set() methods, they do not synchronize access on any iterators that you
+may create from the synchronized collection.
+
+Unlike the concurrent collections, the synchronized collections also throw an exception
+if they are modified within an iterator by a single thread.
+
+#####################################################################
+Working with Parallel Streams
+#####################################################################
+
+By default, the number of threads available in a parallel stream is related to
+the number of available CPUs in your environment. In order to increase the
+thread count, you would need to create your own custom class.
+
+====================================================================
+> Creating Parallel Streams : 
+====================================================================
+
+a.parallel()
+------------
+Stream<Integer> stream = Arrays.asList(1,2,3,4,5,6).stream();
+Stream<Integer> parallelStream = stream.parallel();
+
+b.parallelStream()
+------------------
+Stream<Integer> parallelStream2 = Arrays.asList(1,2,3,4,5,6).parallelStream();
+
+The Stream interface includes a method isParallel() that can be used
+to test if the instance of a stream supports parallel processing. Some
+operations on streams preserve the parallel attribute, while others do
+not. For example, the Stream.concat(Stream s1, Stream s2) is parallel
+if either s1 or s2 is parallel. On the other hand, flatMap() creates a new
+stream that is not parallel by default, regardless of whether the underlying
+elements were parallel.
+
+====================================================================
+> Processing Tasks in Parallel
+====================================================================
+
+Ordering forEach Results:
+-------------------------
+Arrays.asList(1,2,3,4,5,6)
+.parallelStream()
+.forEachOrdered(s -> System.out.print(s+" "));
+
+stream operations that occur
+before/after the forEachOrdered() can still gain performance improvements for using a
+parallel stream.
+
+--------------------------------------------------------------------
+Understanding Performance Improvements
+--------------------------------------------------------------------
+the performance of using parallel
+streams will vary with your local computing environment. There is never
+a guarantee that using a parallel stream will improve performance. In fact,
+using a parallel stream could slow the application due to the overhead
+of creating the parallel processing structures. That said, in a variety of
+circumstances, applying parallel streams could result in significant performance
+gains.
+
+--------------------------------------------------------------------
+Understanding Independent Operations
+--------------------------------------------------------------------
+
+Parallel streams can improve performance because they rely on the property that many stream
+operations can be executed independently. By independent operations, we mean that the results
+of an operation on one element of a stream do not require or impact the results of another
+element of the stream.
+
+Many common streams including map() , forEach() , and filter() can be processed
+independently, although order is never guaranteed.
+
+When using streams, you should avoid any lambda expressions that can produce side
+effects. ex: Below sout's are not consistent 
+Arrays.asList("jackal", "kangaroo", "lemur")
+				.parallelStream()
+				.map(s -> {System.out.println(s); return s.toUpperCase();})
+				.forEach(System.out::println);
+
+Finally, you should remember that parallel streams can process
+results independently, although the order of the results cannot be determined
+ahead of time.				
+
+--------------------------------------------------------------------
+Avoiding Stateful Operations
+--------------------------------------------------------------------
+
+Side effects can also appear in parallel streams if your lambda expressions are stateful. A
+stateful lambda expression is one whose result depends on any state that might change during
+the execution of a pipeline. On the other hand, a stateless lambda expression is one whose
+result does not depend on any state that might change during the execution of a pipeline.
+
+List<Integer> data = Collections.synchronizedList(new ArrayList<>());
+Arrays.asList(1,2,3,4,5,6).parallelStream()
+	.map(i -> {data.add(i); return i;}) // AVOID STATEFUL LAMBDA EXPRESSIONS!
+	.forEachOrdered(i -> System.out.print(i+" "));
+
+for(Integer e: data) 
+	System.out.print(e+" ");
+	
+====================================================================
+> Processing Parallel Reductions	
+====================================================================
+
+Reduction operations on parallel streams are referred to as parallel reductions. 
+The results for parallel reductions can be different from what you expect when working with serial streams.
+
+Any stream operation that is based on order, including findFirst(), limit(), or
+skip(), may actually perform more slowly in a parallel environment. This is a result of a
+parallel processing task being forced to coordinate all of its threads in a synchronized-like
+fashion.
+On the plus side, the results of ordered operations on a parallel stream will be consistent
+with a serial stream. For example, calling skip(5).limit(2).findFirst() will return the
+same result on ordered serial and parallel streams.
+
+For serial streams, using an unordered version has no effect, but on parallel streams, the
+results can greatly improve performance:
+Arrays.asList(1,2,3,4,5,6).stream().unordered().parallel();
+
+--------------------------------------------------------------------
+Combining Results with reduce()
+--------------------------------------------------------------------
+
+Requirements for reduce() Arguments
+■ The identity must be defined such that for all elements in the stream u ,
+combiner.apply(identity, u) is equal to u .
+■ The accumulator operator op must be associative and stateless such that (a op b) op c
+is equal to a op (b op c) .
+■ The combiner operator must also be associative and stateless and compatible with the
+identity, such that for all u and t combiner.apply(u,accumulator.apply(identity,t))
+is equal to accumulator.apply(u,t) .
+
+Although the one- and two-argument versions of reduce() do support parallel processing,
+it is recommended that you use the three-argument version of reduce() when
+working with parallel streams. Providing an explicit combiner method allows the JVM to
+partition the operations in the stream more efficiently.
+
+--------------------------------------------------------------------
+Combing Results with collect()
+--------------------------------------------------------------------
+
+Stream<String> stream = Stream.of("w", "o", "l", "f").parallel();
+SortedSet<String> set = stream.collect(ConcurrentSkipListSet::new, Set::add,
+Set::addAll);
+System.out.println(set); // [f, l, o, w]
+
+Using the One-Argument collect() Method
+
+Stream<String> stream = Stream.of("w", "o", "l", "f").parallel();
+Set<String> set = stream.collect(Collectors.toSet());
+System.out.println(set); // [f, w, l, o]
+
+Requirements for Parallel Reduction with collect()
+■■ The stream is parallel.
+■■ The parameter of the collect operation has the Collector.Characteristics.CONCURRENT
+characteristic.
+■■ Either the stream is unordered, or the collector has the characteristic
+Collector.Characteristics.UNORDERED.
+
+The Collectors class includes two sets of methods for retrieving collectors
+that are both UNORDERED and CONCURRENT, Collectors.toConcurrentMap() and
+Collectors.groupingByConcurrent(), and therefore it is capable of performing parallel
+reductions efficiently.
+
+#####################################################################
+Managing Concurrent Processes
+#####################################################################
+
+The Concurrency API includes classes that can be used to coordinate tasks among a group
+of related threads. These classes are designed for use in specific scenarios, similar to many
+of the design patterns that you saw in Chapter 2. In this section, we present two classes
+with which you should be familiar for the exam, CyclicBarrier and ForkJoinPool.
+
+====================================================================
+> Creating a CyclicBarrier
+====================================================================
+
+If you are using a thread pool, make sure that you set the number of available threads to
+be at least as large as your CyclicBarrier limit value.
+Otherwise, the code will hang indefinitely.
+
+CyclicBarrier c1 = new CyclicBarrier(4);
+CyclicBarrier c2 = new CyclicBarrier(4, () -> System.out.println("*** Pen Cleaned!"));
+
+for(int i=0; i<4; i++)
+service.submit(() -> manager.performTask(c1,c2));
+
+c1.await();
+c2.await();
+
+Reusing CyclicBarrier
+---------------------
+After a CyclicBarrier is broken, all threads are released and the number of threads waiting
+on the CyclicBarrier goes back to zero. At this point, the CyclicBarrier may be
+used again for a new set of waiting threads. For example, if our CyclicBarrier limit is 5
+and we have 15 threads that call await(), then the CyclicBarrier will be activated a total
+of three times.
+
+c1.await();
+c1.await();
+
+====================================================================
+> Applying the Fork/Join Framework
+====================================================================
+
+When a task gets too complicated(we have no idea how
+many tasks need to be performed), we can split the task
+into multiple other tasks using the fork/join framework.
+
+Applying the fork/join framework requires us to perform three steps:
+1. Create a ForkJoinTask.
+2. Create the ForkJoinPool.
+3. Start the ForkJoinTask.
+
+Implement the fork/join solution by extending one of two classes, 
+RecursiveAction and RecursiveTask, both of which implement
+the ForkJoinTask interface.
+
+ForkJoinTask<?> task = new WeighAnimalAction(weights,0,weights.length);
+ForkJoinPool pool pool = new ForkJoinPool();
+pool.invoke(task);
+
+... compute() method ...
+
+invokeAll(new WeighAnimalAction(weights,start,middle),
+new WeighAnimalAction(weights,middle,end));
+........................
+
+the difference between RecursiveAction and RecursiveTask is analogous to
+the difference between Runnable and Callable, respectively
+
+Dividing tasks into recursive subtasks may not always result in evenly
+divided sets. In our zoo example, one zoo worker may end up with three
+animals to weigh, while others may have only one animal to weigh. The
+goal of the fork/join framework is to break up large tasks into smaller ones,
+not to guarantee every base case ends up being exactly the same size.
+
+Creating a ForkJoinTask and submitting it to a ForkJoinPool does not
+guarantee it will be executed immediately. For example, a recursive step
+may generate 10 tasks when there are only four threads available. Like a
+pooled thread executor, the tasks will wait for an available thread to start
+processing the data.
+
+----------------------------
+Working with a RecursiveTask
+----------------------------
+
+Since the invokeAll() method doesn’t return a value, we instead
+issue a fork() and join() command to retrieve the recursive data.
+
+The fork() method instructs the fork/join framework to complete the task in a separate thread, 
+while the join() method causes the current thread to wait for the results.
+
+... compute() method ...
+
+RecursiveTask<Double> otherTask = new WeighAnimalTask(weights,start,middle);
+otherTask.fork();
+return new WeighAnimalTask(weights,middle,end).compute() + otherTask.join();
+
+----------------------------
+Identifying Fork/Join Issues
+----------------------------
+
+Tips for Reviewing a Fork/Join Class
+■■ The class should extend RecursiveAction or RecursiveTask.
+■■ If the class extends RecursiveAction, then it should override a protected compute()
+method that takes no arguments and returns void.
+■■ If the class extends RecursiveTask, then it should override a protected compute()
+method that takes no arguments and returns a generic type listed in the class
+definition.
+■■ The invokeAll() method takes two instances of the fork/join class and does not return
+a result.
+■■ The fork() method causes a new task to be submitted to the pool and is similar to the
+thread executor submit() method.
+■■ The join() method is called after the fork() method and causes the current thread to
+wait for the results of a subtask.
+■■ Unlike fork(), calling compute() within a compute() method causes the task to wait
+for the results of the subtask.
+■■ The fork() method should be called before the current thread performs a compute()
+operation, with join() called to read the results afterward.
+■■ Since compute() takes no arguments, the constructor of the class is often used to pass
+instructions to the task.
+
+#####################################################################
+Identifying Threading Problems
+#####################################################################
+
+Understanding Liveness
+----------------------
+
+As you have seen in this chapter, many thread operations can be performed independently,
+but some require coordination. For example, synchronizing, CyclicBarrier.
+
+For the exam, there are three types of liveness issues with
+which you should be familiar: deadlock, starvation, and livelock.
+
+Deadlock occurs when two or more threads are blocked forever, each waiting on the other.
+
+Starvation occurs when a single thread is perpetually denied access to a shared resource
+or lock. The thread is still active, but it is unable to complete its work as a result of other
+threads constantly taking the resource that they trying to access.
+
+Livelock is a special case of resource
+starvation in which two or more threads actively try to acquire a set of locks, are unable to
+do so, and restart part of the process.
+
+#####################################################################
+Applying Locks
+#####################################################################
+
+The Concurrency API includes the Lock framework that is conceptually similar to using
+the synchronized keyword, but with a lot more features and options available than the
+standard monitor
+
+====================================================================
+Understanding the Lock Framework
+====================================================================
+
+The Lock framework works in a similar manner to the synchronized code, 
+except that the methods to acquire and release the lock are explicitly called.
+Also, instead of being able to synchronize on any Object, we can only synchronize on an
+object that implements the Lock interface.
+
+you can’t mix and match the Lock framework and the synchronized keyword,
+as the Lock framework is an alternative to synchronization.
+
+// Implementation #1 with synchronization
+-----------------------------------------
+Object object = new Object();
+synchronized(object) {
+System.out.print(" "+(++birdCount));
+}
+
+// Implementation #2 with a Lock
+--------------------------------
+Lock lock = new ReentrantLock();
+try {
+	lock.lock();
+	System.out.print(" "+(++birdCount));
+} finally {
+	lock.unlock();
+}
+
+If you attempt to release a lock that you do not have,
+you will get an exception at runtime in the form of an IllegalMonitorStateException
+Lock lock = new ReentrantLock();
+lock.unlock(); // Throws IllegalMonitorStateException at runtime
+
+Attempting to Acquire a Lock
+----------------------------
+While the lock() method allows you to wait for a lock, it suffers from the same problem
+as the synchronized keyword.
+
+tryLock()
+tryLock(long time, TimeUnit unit)
+
+The tryLock() method will attempt to acquire a lock and immediately return a boolean
+result indicating whether or not the lock was obtained.
+
+Unlike synchronization, though, the ReentrantLock class maintains a counter on the number of
+times the lock has been given out. The result is that the unlock() method must be called
+the same number of times as the lock() method in order to release the lock.
+
+Fair Lock Management
+--------------------
+The ReentrantLock class has the optional feature that the thread that has been waiting
+the longest can be guaranteed the lock the next time it is released. This property is often
+referred to as fairness , and it corresponds to a FIFO ordering to avoid thread starvation.
+Lock lock = new ReentrantLock(true);
+
+As even Oracle’s documentation for the ReentrantLock class points out,
+enabling fairness may not have the desired outcome and could significantly
+slow down your program under certain circumstances. Therefore,
+you should use it only in situations where you really need your requests
+ordered in a particular manner.
+
+====================================================================
+Understanding Read/Write Locks
+====================================================================
+
+Lock readLock() Returns a lock that may be held simultaneously by multiple threads
+and is therefore not mutually exclusive.
+
+Lock writeLock() Returns a lock that is exclusive to all other locks, read and write,
+and may only be held by a single thread.
+
+threads performing read operations can continue reading the data concurrently,
+stopping to wait only when a single thread has been granted a write access.
+
+Using a ReentrantReadWriteLock : ZooEmployeeNameManager.java
+
+

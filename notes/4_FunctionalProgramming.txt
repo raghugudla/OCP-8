@@ -1,0 +1,317 @@
+Chapter 4: Functional Programming
+---------------------------------
+
+Using Variables in Lambdas
+--------------------------
+Lambda expressions can access static variables, instance variables, effectively final
+method parameters, and effectively final local variables.
+
+Common Functional Interfaces
+----------------------------
+Interface   Parameters  Return type Method
+Supplier<T>     0           T        get
+Consumer<T>     1         void      accept
+BiConsumer<T, U> 2        void      accept
+Predicate<T>    1         boolean   test
+BiPredicate<T, U> 2       boolean   test
+Function<T, R>  1 T       R         apply
+BiFunction<T, U, R>  2 T,U   R      apply
+UnaryOperator<T>  1       T         apply
+BinaryOperator<T, T>  2   T         apply
+
+Function<String, Integer> f1 = String::length;
+Function<String, Integer> f2 = x -> x.length();
+System.out.println(f1.apply("cluck"));
+System.out.println(f2.apply("cluck"));
+
+BiFunction<String, String, String> b1 = String::concat;
+BiFunction<String, String, String> b2 = (string, toAdd) -> string.concat(toAdd);
+System.out.println(b1.apply("baby ", "chick")); // baby chick
+System.out.println(b2.apply("baby ", "chick")); // baby chick
+
+UnaryOperator<String> u1 = String::toUpperCase;
+UnaryOperator<String> u2 = x -> x.toUpperCase();
+System.out.println(u1.apply("chirp"));
+System.out.println(u2.apply("chirp"));
+
+BinaryOperator<String> b1 = String::concat;
+BinaryOperator<String> b2 = (string, toAdd) -> string.concat(toAdd);
+System.out.println(b1.apply("baby ", "chick")); // baby chick
+System.out.println(b2.apply("baby ", "chick")); // baby chick
+
+######################################################
+Using Streams
+######################################################
+
+Scenario For Intermediate Operations? For Terminal Operations?
+----------------------------------
+Required part of a useful pipeline? No Yes
+Can exist multiple times in a pipeline? Yes No
+Return type is a stream type? Yes No
+Executed upon method call? No Yes
+Stream valid after call? Yes No
+
+=========================================================
+Common Terminal Operations
+=========================================================
+findAny/findFirst always terminate an infinite stream.
+
+allMatch/anyMatch/noneMatch sometimes terminate an infinite stream.
+
+Other terminal operations doesn't terminate an infinite stream.
+
+1. findAny() / findFirst()
+---------------------------
+Optional<T>	findAny()
+Returns an Optional describing some element of the stream, or an empty Optional if the stream is empty.
+
+Optional<T>	findFirst()
+Returns an Optional describing the first element of this stream, or an empty Optional if the stream is empty.
+
+2. allMatch(), anyMatch() and noneMatch()
+------------------------------------------
+boolean	allMatch(Predicate<? super T> predicate)
+Returns whether all elements of this stream match the provided predicate.
+
+boolean	anyMatch(Predicate<? super T> predicate)
+Returns whether any elements of this stream match the provided predicate.
+
+boolean	noneMatch(Predicate<? super T> predicate)
+Returns whether no elements of this stream match the provided predicate.
+
+3. forEach()
+------------
+void	forEach(Consumer<? super T> action)
+Performs an action for each element of this stream.
+
+void	forEachOrdered(Consumer<? super T> action)
+Performs an action for each element of this stream,
+in the encounter order of the stream if the stream has a defined encounter order.
+
+4. count()
+----------
+long	count()
+Returns the count of elements in this stream.
+
+5. min() and max()
+------------------
+Optional<T>	max(Comparator<? super T> comparator)
+Returns the maximum element of this stream according to the provided Comparator.
+
+Optional<T>	min(Comparator<? super T> comparator)
+Returns the minimum element of this stream according to the provided Comparator.
+
+Remember that you can call forEach() directly on a Collection or on a
+Stream .
+
+6. reduce()
+-----------
+Optional<T>	reduce(BinaryOperator<T> accumulator)
+Performs a reduction on the elements of this stream,
+using an associative accumulation function, and returns an Optional describing the reduced value, if any.
+
+■ ■ If the stream is empty, an empty Optional is returned.
+■ ■ If the stream has one element, it is returned.
+■ ■ If the stream has multiple elements, the accumulator is applied to combine them.
+
+T	reduce(T identity, BinaryOperator<T> accumulator)
+Performs a reduction on the elements of this stream, using the provided identity value and
+an associative accumulation function, and returns the reduced value.
+
+<U> U	reduce(U identity, BiFunction<U,? super T,U> accumulator, BinaryOperator<U> combiner)
+Performs a reduction on the elements of this stream, using the provided identity,
+accumulation and combining functions.
+
+The third method signature is used when we are processing collections in parallel.
+Java creates intermediate reductions in the accumulator part.
+Finally, combines them at the end.
+
+In case of not parallel streams, Java assumes the stream is parallel,
+
+7. collect()
+------------
+<R,A> R	collect(Collector<? super T,A,R> collector)
+Performs a mutable reduction operation on the elements of this stream using a Collector.
+
+<R> R	collect(Supplier<R> supplier, BiConsumer<R,? super T> accumulator, BiConsumer<R,R> combiner)
+Performs a mutable reduction operation on the elements of this stream.
+
+The final parameter is another BiConsumer .
+This is useful when we are processing in parallel.
+
+Collecting Results
+------------------
+1) Calculates the average for our three core primitive types
+
+averagingDouble(ToDoubleFunction f)
+averagingInt(ToIntFunction f)
+averagingLong(ToLongFunction f)
+
+returns Double
+
+2) Counts number of elements
+Long counting()
+
+3) Grouping
+Map<K, List<T>> groupingBy(Function f)
+groupingBy(Function f, Collector dc)
+groupingBy(Function f, Supplier s, Collector dc)
+
+4) Joining
+joining()
+joining(CharSequence cs)
+
+returns String
+
+5) min and max
+Optional<T> minBy(Comparator c)
+Optional<T> maxBy(Comparator c)
+
+6) mapping
+Collector mapping(Function f, Collector dc)
+
+7) Partition
+Map<Boolean, List<T>> partitionBy(Predicate p)
+partitionBy(Predicate p, Collector dc)
+
+8) summarizing (calculates avg, min, max and so on)
+
+DoubleSummaryStatistics summarizingDouble(ToDoubleFunction f)
+IntSummaryStatistics summarizingInt(ToIntFunction f)
+LongSummaryStatistics summarizingLong(ToLongFunction f)
+
+9) summing
+
+Double summingDouble(ToDoubleFunction f)
+Integer summingInt(ToIntFunction f)
+Long summingLong(ToLongFunction f)
+
+10)
+List toList()
+Set toSet()
+
+Collection toColletion(Supplier s)
+
+11)
+Map toMap(Function k, Function v)
+toMap(Function k, Function v, BinaryOperator m)
+toMap(Function k, Function v, BinaryOperator m, Supplier s)
+
+=========================================================
+Common Intermediate Operations
+=========================================================
+
+1. filter
+---------
+Stream<T>	filter(Predicate<? super T> predicate)
+Returns a stream consisting of the elements of this stream that match the given predicate.
+
+2. map
+-------
+<R> Stream<R> map(Function<? super T, ? extends R> mapper)
+
+Returns a stream consisting of the results of applying the given function to the elements of this stream.
+
+3. flatMap
+-------
+<R> Stream<R> flatMap(Function<? super T, ? extends Stream<? extends R>> mapper)
+
+Returns a stream consisting of the results of replacing each element of this stream with the contents
+of a mapped stream produced by applying the provided mapping function to each element.
+
+4. limit and skip
+-----------------
+Stream<T> limit(long maxSize)
+Stream<T> skip(long n)
+
+Stream<Integer> s = Stream.iterate(1, n -> n + 1);
+s.skip(5).limit(2).forEach(System.out::print); // 67
+
+5. distinct
+-----------
+Stream<T>	distinct()
+Returns a stream consisting of the distinct elements (according to Object.equals(Object)) of this stream.
+
+6. sorted
+-----------
+Stream<T>	sorted()
+Stream<T> sorted(Comparator<? super T> comparator)
+
+7. peek
+--------
+Stream<T>	peek(Consumer c)
+Returns a stream consisting of the elements of this stream,
+additionally performing the provided action on each element as elements are consumed from the resulting stream.
+
+Remember that peek() is intended to perform an operation without changing the result.
+
+=========================================================
+Working with Primitives
+=========================================================
+■ ■ IntStream : Used for the primitive types int , short , byte , and char
+■ ■ LongStream : Used for the primitive type long
+■ ■ DoubleStream : Used for the primitive types double and float
+
+long Stream.count()
+
+Double Collectors.averagingInt
+Double Collectors.averagingLong
+Double Collectors.averagingDouble
+
+Integer Collectors.summingInt
+Long Collectors.summingLong
+Double Collectors.summingDouble
+
+OptionalDouble	IntStrem.average()
+int IntStrem.sum()
+
+OptionalDouble	LongStrem.average()
+long IntStrem.sum()
+
+OptionalDouble	DoubleStrem.average()
+double DoubleStrem.sum()
+
+Mapping methods between types of streams
+-----------------------------------------------------------
+Stream        map         mapToDouble   mapToInt  mapToLong
+DoubleStream  mapToObj    map           mapToInt  mapToLong
+IntStream     mapToObj    mapToDouble   map       mapToLong
+LongStream    mapToObj    mapToDouble   mapToInt  map
+-----------------------------------------------------------
+
+Function parameters when mapping between types of streams
+----------------------------------------------------------------------------------------------
+Stream        Function          ToDoubleFunction      ToIntFunction           ToLongFunction
+DoubleStream  DoubleFunction    DoubleUnaryOperator   DoubleToIntFunction     DoubleToLongFunction
+IntStream     IntFunction       IntToDoubleFunction   IntUnaryOperator        IntToLongFunction
+LongStream    LongFunction      LongToDoubleFunction  LongToIntFunction       LongUnaryOperator
+----------------------------------------------------------------------------------------------
+
+Primitives Functional Interfaces
+--------------------------------
+OptionalDouble.getAsDouble().orElseGet(
+    DoubleSupplier.getAsDouble(double))
+OptionalInt.getAsInt().orElseGet(
+    IntSupplier.getAsInt(int))
+OptionalLong.getAsLong().orElseGet(
+    LongSupplier.getAsLong(long))
+
+DoubleConsumer.accept(double)
+IntConsumer.accept(int)
+LongConsumer.accept(long)
+
+DoublePredicate.test(double)
+IntPredicate.test(int)
+LongPredicate.test(long)
+
+DoubleFunction<R> : R apply(double)
+IntFunction<R> : R apply(int)
+LongFunction<R> : R apply(long)
+
+DoubleUnaryOperator : double applyAsDouble(double)
+IntUnaryOperator : int applyAsInt(int)
+LongUnaryOperator : long applyAsLong(long)
+
+DoubleBinaryOperator : double applyAsDouble(double, double)
+IntBinaryOperator : int applyAsInt(int, int)
+LongBinaryOperator : long applyAsLong(long, long)

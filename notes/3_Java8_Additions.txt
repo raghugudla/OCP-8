@@ -1,0 +1,130 @@
+Chapter 3: Additions in Java 8
+---------------------------------------------
+
+######################################################
+Method references
+######################################################
+There are four formats for method references:
+■ Static methods
+■ Instance methods on a particular instance
+■ Instance methods on an instance to be determined at runtime
+■ Constructors
+
+1)
+Consumer<List<Integer>> lambda1 = l -> Collections.sort(l);
+Consumer<List<Integer>> methodRef1 = Collections::sort;
+
+2)
+String str = "abc";
+Predicate<String> lambda2 = s -> str.startsWith(s);
+Predicate<String> methodRef2 = str::startsWith;
+
+3)
+Predicate<String> methodRef3 = String::isEmpty;
+Predicate<String> lambda3 = s -> s.isEmpty();
+
+4)
+Supplier<ArrayList> methodRef4 = ArrayList::new;
+Supplier<ArrayList> lambda4 = () -> new ArrayList();
+
+######################################################
+Removing Conditionally
+######################################################
+
+1) Collection.removeIf
+----------------------
+default boolean	removeIf(Predicate<? super E> filter)
+
+Removes all of the elements of this collection that satisfy the given predicate.
+
+ex:remove all of the strings that begin with the letter A in a list of Strings
+list.removeIf(s -> s.startsWith("A"));
+
+2) List.replaceAll
+------------------
+default void	replaceAll(UnaryOperator<E> operator)
+
+Replaces each element of this list with the result of applying the operator to that element.
+
+List<Integer> list = Arrays.asList(1, 2, 3);
+list.replaceAll(x -> x*2);
+System.out.println(list); // [2, 4, 6]
+
+3) Collection.forEach
+---------------------
+default void forEach(Consumer<? super T> action)
+
+Performs the given action for each element of the Iterable until all elements have been processed or
+the action throws an exception. Unless otherwise specified by the implementing class,
+actions are performed in the order of iteration (if an iteration order is specified).
+Exceptions thrown by the action are relayed to the caller.
+
+######################################################
+Using New Java 8 Map APIs
+######################################################
+
+1) Map.putIfAbsent
+------------------
+default V	putIfAbsent(K key, V value)
+
+If the specified key is not already associated with a value (or is mapped to null) associates it with
+the given value and returns null, else returns the current value.
+
+Map<String, String> favorites = new HashMap<>();
+favorites.put("Jenny", "Bus Tour");
+favorites.put("Tom", null);
+
+favorites.putIfAbsent("Jenny", "Tram");
+favorites.putIfAbsent("Sam", "Tram");
+favorites.putIfAbsent("Tom", "Tram");
+System.out.println(favorites); // {Tom=Tram, Jenny=Bus Tour, Sam=Tram}
+
+2) Map.merge
+-------------
+default V	merge(K key, V value, BiFunction<? super V,? super V,? extends V> remappingFunction)
+
+If the specified key is not already associated with a value or is associated with null,
+associates it with the given non-null value.
+
+If the key doen't exist or if they key exist and contains a null value, then mapper is not invoked.
+Simply merge function puts those key values in the map, same like putIfAbsent.
+
+If the K and V exists only, then the mapper is invoked.
+
+If the BiFunction mapper returns null, then that entry will be removed from the map.
+
+ex:
+BiFunction<String, String, String> mapper = (v1, v2) -> null;
+
+Map<String, String> favorites = new HashMap<>();
+favorites.put("Jenny", "Bus Tour");
+favorites.put("Tom", "Bus Tour");
+
+favorites.merge("Jenny", "Skyride", mapper);
+favorites.merge("Sam", "Skyride", mapper);
+System.out.println(favorites); // {Tom=Bus Tour, Sam=Skyride}
+
+Tom was left alone since there was no merge() call for that key. Sam was added since
+that key was not in the original list. Jenny was removed because the mapping function
+returned null .
+
+3). Map.computeIfPresent
+------------------------
+default V	compute(K key, BiFunction<? super K,? super V,? extends V> remappingFunction)
+
+Attempts to compute a mapping for the specified key and its current mapped value (or null if there is no current mapping).
+
+computeIfPresent() calls the BiFunction if the requested key is found.
+
+The function interface is a BiFunction again. However, this time the key and value are
+passed rather than two values not like with merge()
+
+3). Map.computeIfAbsent
+-----------------------
+default V	computeIfAbsent(K key, Function<? super K,? extends V> mappingFunction)
+
+If the specified key is not already associated with a value (or is mapped to null),
+attempts to compute its value using the given mapping function and enters it into this map unless null.
+
+For computeIfAbsent() , the functional interface runs only when the key isn’t present or
+is null

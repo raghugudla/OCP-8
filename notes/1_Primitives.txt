@@ -1,0 +1,59 @@
+byte, short, int, long default value is 0
+
+must initialize "decalred" primitives in methods
+
+literals can start with underscore ex: 
+int _123=0;
+int i = _123;
+
+float, double default value is 0.0
+
+float, double prints value with decimal, ex:
+float f = 123
+sout(f) = 123.0
+
+if the initializing value contains decimal part for float type, f or F indicator is mandatory
+but incase of double indicator (d or D) is optional. ex:
+float f = 0.123456789F
+double d = 0.123456789
+
+down casting requires explicit casting. ex
+int i = 100;
+byte b = (byte)i;
+
+Octal (Digits 0–7) This format uses the number 0 as a prefix, for example, 017.
+Hexadecimal (Digits 0–9 and Letters A–F) This format uses the number 0 followed by x
+or X as a prefix, for example, 0xFF.
+Binary (Digits 0–1) This format uses the number 0 followed by b or B as a prefix, for
+example, 0b10.
+
+        byte binary = 0b11;
+        System.out.println("binary = " + binary);
+
+        short octal = 011;
+        System.out.println("octal = " + octal);
+
+        int hexad = 0xFF;
+        System.out.println("hexad = " + hexad);
+
+#######################################################
+Making Decisions with Switch
+#######################################################
+
+Supported Data Types
+--------------------
+■■ int and Integer
+■■ byte and Byte
+■■ short and Short
+■■ char and Character
+■■ String
+■■ enum values
+
+Compile-Time Constant Values
+----------------------------
+The values in each case statement must be compile-time constant values of the same
+data type as the switch value. This means that you can use only literals, enum constants,
+or final constant variables of the same data type. By final constant, we mean that the
+variable must be marked with the final modifier and initialized with a literal value in the
+same expression in which it is declared.
+

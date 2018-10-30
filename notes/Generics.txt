@@ -1,0 +1,220 @@
+Generics
+--------
+
+Tutorial Link: https://docs.oracle.com/javase/tutorial/java/generics/index.html
+
+A generic class is defined with the following format:
+
+class name<T1, T2, ..., Tn> { /* ... */ }
+
+The type parameter section, delimited by angle brackets (<>), follows the class name.
+It specifies the type parameters (also called type variables) T1, T2, ..., and Tn.
+
+Type Parameter Naming Conventions
+---------------------------------
+The most commonly used type parameter names are:
+
+E - Element (used extensively by the Java Collections Framework)
+K - Key
+N - Number
+T - Type
+V - Value
+S,U,V etc. - 2nd, 3rd, 4th types
+
+The Diamond
+-----------
+In Java SE 7 and later, you can replace the type arguments required to invoke
+the constructor of a generic class with an empty set of type arguments (<>)
+as long as the compiler can determine, or infer, the type arguments from the context.
+
+Box<Integer> integerBox = new Box<>();
+
+Raw Types
+---------
+
+Box rawBox = new Box();
+
+Box<String> stringBox = new Box<>();
+Box rawBox = stringBox;               // OK
+
+Box rawBox = new Box();           // rawBox is a raw type of Box<T>
+Box<Integer> intBox = rawBox;     // warning: unchecked conversion
+
+Box<String> stringBox = new Box<>();
+Box rawBox = stringBox;
+rawBox.set(8);  // warning: unchecked invocation to set(T)
+
+=========================================================
+Bounded Type Parameters
+=========================================================
+
+For example, a method that operates on numbers might only want to
+accept instances of Number or its subclasses.
+To declare a bounded type parameter, list the type parameter's name, followed by the extends keyword,
+followed by its upper bound, which in this example is Number.
+
+    public <N extends Number> void inspect(N n) {
+        System.out.println("argument class: " + n.getClass());
+    }
+
+MultipleBounds
+--------------
+A type variable with multiple bounds is a subtype of all the types listed in the bound.
+If one of the bounds is a class, it must be specified first. For example:
+
+Class A { /* ... */ }
+interface B { /* ... */ }
+interface C { /* ... */ }
+
+class D <T extends A & B & C> { /* ... */ }
+If bound A is not specified first, you get a compile-time error:
+
+class D <T extends B & A & C> { /* ... */ }  // compile-time error
+
+Generic Methods and Bounded Type Parameters
+-------------------------------------------
+
+public static <T extends Comparable<T>> int countGreaterThan(T[] anArray, T elem) {
+    int count = 0;
+    for (T e : anArray)
+        if (e.compareTo(elem) > 0)
+            ++count;
+    return count;
+}
+
+=========================================================
+Generics, Inheritance, and Subtypes
+=========================================================
+Box<Number> box = new Box<Number>();
+box.add(new Integer(10));   // OK
+box.add(new Double(10.1));  // OK
+
+Now consider the following method:
+
+public void boxTest(Box<Number> n) { /* ... */ }
+
+What type of argument does it accept? By looking at its signature,
+you can see that it accepts a single argument whose type is Box<Number>.
+But what does that mean? Are you allowed to pass in Box<Integer> or Box<Double>, as you might expect?
+The answer is "no", because Box<Integer> and Box<Double> are not subtypes of Box<Number>.
+
+Box<Number> and Box<Integer> are noway related.
+
+Generic Classes and Subtyping
+-----------------------------
+Using the Collections classes as an example, ArrayList<E> implements List<E>, and List<E> extends Collection<E>.
+So ArrayList<String> is a subtype of List<String>, which is a subtype of Collection<String>.
+So long as you do not vary the type argument,
+the subtyping relationship is preserved between the types.
+
+interface PayloadList<E,P> extends List<E> {
+  void setPayload(int index, P val);
+  ...
+}
+
+The following parameterizations of PayloadList are subtypes of List<String>:
+
+PayloadList<String,String>
+PayloadList<String,Integer>
+PayloadList<String,Exception>
+
+=========================================================
+Type Inference
+=========================================================
+Type inference is a Java compiler's ability to look at each method invocation and corresponding declaration to determine
+the type argument (or arguments) that make the invocation applicable.
+The inference algorithm determines the types of the arguments and, if available, the type that the result is being assigned,
+or returned.
+Finally, the inference algorithm tries to find the most specific type that works with all of the arguments.
+
+You can replace the type arguments required to invoke the constructor of a generic class with an empty set of
+type parameters (<>) as long as the compiler can infer the type arguments from the context.
+This pair of angle brackets is informally called the diamond.
+
+Map<String, List<String>> myMap = new HashMap<String, List<String>>();
+
+You can substitute the parameterized type of the constructor with an empty set of type parameters (<>):
+
+Map<String, List<String>> myMap = new HashMap<>();
+
+Note that to take advantage of type inference during generic class instantiation, you must use the diamond.
+In the following example, the compiler generates an unchecked conversion warning because the HashMap() constructor
+refers to the HashMap raw type, not the Map<String, List<String>> type:
+
+Map<String, List<String>> myMap = new HashMap(); // unchecked conversion warning
+
+=========================================================
+Wildcards
+=========================================================
+The wildcard is never used as a type argument for a generic method invocation,
+a generic class instance creation, or a supertype. ex:
+
+Collections.<?>emptyList();
+Box<?> box = new Box<?>;
+
+Upper Bounded Wildcards
+-----------------------
+
+For example, say you want to write a method that works on List<Integer>, List<Double>, and List<Number>; you can achieve
+this by using an upper bounded wildcard.
+
+you would specify List<? extends Number>. The term List<Number> is more restrictive than List<? extends Number>
+because the former matches a list of type Number only, whereas the latter matches a list of type Number or
+any of its subclasses.
+
+Unbounded Wildcards
+-------------------
+
+for example, List<?>. This is called a list of unknown type. There are two scenarios where an unbounded wildcard is a
+useful approach:
+
+If you are writing a method that can be implemented using functionality provided in the Object class.
+When the code is using methods in the generic class that don't depend on the type parameter.
+For example, List.size or List.clear. In fact, Class<?> is so often used because most of the methods in Class<T>
+do not depend on T.
+
+Lower Bounded Wildcards
+-----------------------
+
+a lower bounded wildcard restricts the unknown type to be a specific type or a super type of that type.
+
+You can specify an upper bound for a wildcard, or you can specify a lower bound, but you cannot specify both.
+
+you would specify List<? super Integer>. The term List<Integer> is more restrictive than List<? super Integer>
+because the former matches a list of type Integer only, whereas the latter matches a list of any type that is a
+supertype of Integer.
+
+Wildcard Capture and Helper Methods
+-----------------------------------
+
+In some cases, the compiler infers the type of a wildcard.
+For example, a list may be defined as List<?> but, when evaluating an expression, the compiler infers a particular
+type from the code.
+This scenario is known as wildcard capture.
+
+=========================================================
+Guidelines for Wildcard Use
+=========================================================
+An "In" Variable
+An "in" variable serves up data to the code. Imagine a copy method with two arguments: copy(src, dest).
+The src argument provides the data to be copied, so it is the "in" parameter.
+
+An "Out" Variable
+An "out" variable holds data for use elsewhere. In the copy example, copy(src, dest), the dest argument accepts data,
+so it is the "out" parameter.
+Of course, some variables are used both for "in" and "out" purposes — this scenario is also addressed in the guidelines.
+
+Wildcard Guidelines:
+An "in" variable is defined with an upper bounded wildcard, using the extends keyword.
+An "out" variable is defined with a lower bounded wildcard, using the super keyword.
+In the case where the "in" variable can be accessed using methods defined in the Object class, use an unbounded wildcard.
+In the case where the code needs to access the variable as both an "in" and an "out" variable, do not use a wildcard.
+
+These guidelines do not apply to a method's return type. Using a wildcard as a return type should be avoided because
+it forces programmers using the code to deal with wildcards.
+
+=========================================================
+Type Erasure
+=========================================================
+During the type erasure process, the Java compiler erases all type parameters and replaces each with
+its first bound if the type parameter is bounded, or Object if the type parameter is unbounded.

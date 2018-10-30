@@ -1,0 +1,198 @@
+Chapter 8: IO
+---------------------------------------------------------
+
+=========================================================
+Introducing the File Class
+=========================================================
+
+the java.io.File class, or File class is used to read information
+about existing files and directories, list the contents of a directory, 
+and create/delete files and directories.
+
+Creating a File Object
+----------------------
+
+A File object often is initialized with String containing either an absolute or relative path
+to the file or directory within the file system.
+
+1) absolute path to the zoo.txt file:
+/home/smith/data/zoo.txt
+
+File file = new File("/home/smith/data/zoo.txt");
+
+2) The following is a relative path to the same file, assuming the user’s current directory
+was set to /home/smith.
+data/zoo.txt
+
+File file = new File("data/zoo.txt");
+
+
+3) 
+File parent = new File("/home/smith");
+File child = new File(parent,"data/zoo.txt");
+If the parent object happened to be null, then
+it would be skipped and the method would revert to our single String constructor.
+
+Working with a File Object
+--------------------------
+exists() Returns true if the file or directory exists.
+getName() Returns the name of the file or directory denoted by this path.
+getAbsolutePath() Returns the absolute pathname string of this path.
+isDirectory() Returns true if the file denoted by this path is a directory.
+isFile() Returns true if the file denoted by this path is a file.
+length() Returns the number of bytes in the file. For performance reasons, the
+file system may allocate more bytes on disk than the file actually uses.
+lastModified() Returns the number of milliseconds since the epoch when the file
+was last modified.
+delete() Deletes the file or directory. If this pathname denotes a directory,
+then the directory must be empty in order to be deleted.
+renameTo(File) Renames the file denoted by this path.
+mkdir() Creates the directory named by this path.
+mkdirs() Creates the directory named by this path including any nonexistent
+parent directories.
+getParent() Returns the abstract pathname of this abstract pathname’s parent
+or null if this pathname does not name a parent directory.
+listFiles() Returns a File[] array denoting the files in the directory.
+
+=========================================================
+Introducing Streams
+=========================================================
+
+Some stream classes read or write data as individual byte values. 
+Other stream classes read or write individual characters or strings of characters. 
+On top of that, some stream classes read or write groups of bytes or characters at a time, 
+specifically those with the word Buffered in their name.
+
+1. The stream classes are used for inputting and outputting all types of binary or byte
+data.
+2. The reader and writer classes are used for inputting and outputting only character and
+String data.
+
+All Java Streams Use Bytes
+--------------------------
+Although the java.io API is full of streams that handle characters, strings, groups of
+bytes, and so on, nearly all are built on top of reading or writing an individual byte or
+an array of bytes at a time. The reasoning behind more high-order streams is for convenience
+as well as performance.
+For example, writing a file one byte at a time is time consuming and slow in practice
+because the round-trip between the Java application and the file system is relatively
+expensive. By utilizing a BufferedOutputStream, the Java application can write a large
+chunk of bytes at a time, reducing the round-trips and drastically improving performance.
+
+Why Use Character Streams?
+--------------------------
+Since the byte stream classes can be used to input and output all types of binary data,
+including strings, it naturally follows that you can write all of your code to use the byte
+stream classes, never really needing the character stream classes.
+There are advantages, though, to using the reader/writer classes, as they are specifically
+focused on managing character and string data. For example, you can use a Writer class
+to output a String value to a file without necessarily having to worry about the underlying
+byte encoding of the file.
+For this reason, the character stream classes are sometimes referred to as convenience
+classes for working with text data.
+
+It is important to remember that even though readers/writers do not contain the word
+Stream in their class name, they are still in fact streams!
+
+you should know that PrintWriter has no accompanying PrintReader class. 
+Likewise, the PrintStream class has no corresponding InputStream class.
+
+Low-Level vs. High-Level Streams
+--------------------------------
+
+A low-level stream connects directly with the source of the data, such as a file, an array,
+or a String. For example, a FileInputStream is a class that reads file data
+one byte at a time (FileInputStream, FileOutputStream, FileReader, and FileWriter).
+
+Alternatively, a high-level stream is built on top of another stream using wrapping.
+BufferedReader bufferedReader = new BufferedReader(new FileReader("zoo-data.txt"));
+
+BufferedReader Reads character data from an existing Reader in
+a buffered manner, which improves efficiency and performance
+
+BufferedWriter Writes character data to an existing Writer in a
+buffered manner, which improves efficiency and performance
+
+ObjectInputStream Deserializes primitive Java data types and graphs
+of Java objects from an existing InputStream
+
+ObjectOutputStream Serializes primitive Java data types and graphs
+of Java objects to an existing OutputStream
+
+InputStreamReader Reads character data from an existing InputStream
+
+OutputStreamWriter Writes character data to an existing OutputStream
+
+PrintStream Writes formatted representations of Java objects to a binary stream
+
+PrintWriter Writes formatted representations of Java objects to a 
+text-based output stream Stream Base Classes
+-------------------
+
+The java.io library defines four abstract classes that are the parents of all stream classes
+defined within the API: InputStream, OutputStream, Reader, and Writer.
+
+Review of java.io Class Properties
+----------------------------------
+■■ A class with the word InputStream or OutputStream in its name is used for reading or
+writing binary data, respectively.
+■■ A class with the word Reader or Writer in its name is used for reading or writing
+character or string data, respectively.
+■■ Most, but not all, input classes have a corresponding output class.
+■■ A low-level stream connects directly with the source of the data.
+■■ A high-level stream is built on top of another stream using wrapping.
+■■ A class with Buffered in its name reads or writes data in groups of bytes or characters
+and often improves performance in sequential file systems.
+
+Common Stream Operations
+------------------------
+
+Closing the Stream
+
+Flushing the Stream
+	You do not need to call the flush() method explicitly when you have finished writing
+to a file, since the close() method will automatically do this.
+
+Marking the Stream
+
+Skipping over Data
+
+=========================================================
+Working with Streams
+=========================================================
+
+FileInputStream and FileOutputStream
+------------------------------------
+These are the most basic file stream classes. 
+They are used to read bytes from a file or write bytes to a file, respectively. 
+These classes include constructors that take a File object or String, representing a path to the file.
+
+BufferedInputStream and BufferedOutputStream
+--------------------------------------------
+Instead of reading the data one byte at a time, we use the underlying read(byte[]) method
+of BufferedInputStream, which returns the number of bytes read into the provided byte
+array. The number of bytes read is important for two reasons. First, if the value returned
+is 0, then we know that we have reached the end of the file and can stop reading from the
+BufferedInputStream. Second, the last read of the file will likely only partially fill the byte
+array, since it is unlikely for the file size to be an exact multiple of our buffer array size.
+
+The data is written into the BufferedOutputStream using the write(byte[],int,int)
+method, which takes as input a byte array, an offset, and a length value, respectively. The
+offset value is the number of values to skip before writing characters, and it is often set to 0.
+The length value is the number of characters from the byte array to write.
+
+FileReader and FileWriter
+-------------------------
+Like the FileInputStream and FileOutputStream classes, the FileReader and
+FileWriter classes contain read() and write() methods, respectively.
+These methods read/write char values instead of byte values;
+
+BufferedReader and BufferedWriter
+---------------------------------
+writer.newLine() method to insert a line break into the copied file, as our
+reader.readLine() method split on line breaks.
+
+ObjectInputStream and ObjectOutputStream
+----------------------------------------
+
+

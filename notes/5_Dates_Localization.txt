@@ -1,0 +1,533 @@
+Chapter 5: Dates, Strings, and Localization
+-------------------------------------------
+
+You need an import to work with the date and time classes. 
+Most of them are in the java.time package.
+
+LocalDateTime Contains both a date and time but no time zone. 
+A good example of LocalDateTime is “the stroke of midnight on New Year’s Eve.”
+
+ZonedDateTime Contains a date, time, and time zone. 
+A good example of ZonedDateTime is “a conference call at 9:00 a.m. EST. tomorrow” 
+
+public static LocalDate of(int year, int month, int dayOfMonth)
+public static LocalDate of(int year, Month month, int dayOfMonth)
+
+public static LocalTime of(int hour, int minute)
+public static LocalTime of(int hour, int minute, int second)
+public static LocalTime of(int hour, int minute, int second, int nanos)
+
+LocalDateTime above 2*3 combinations + 
+public static LocalDateTime of(LocalDate date, LocalTime time)
+
+In order to create a ZonedDateTime, we first need to get the desired time zone.
+
+public static ZonedDateTime of(LocalDateTime dateTime, ZoneId zone)
+public static ZonedDateTime of(LocalDate date, LocalTime time, ZoneId zone)
+public static ZonedDateTime of(int year, int month, int dayOfMonth, int hour, int minute, int second, int nanos, ZoneId zone)
+
+Note that there isn’t an option to pass in the Month enum.
+
+#######################################################
+Manipulating Dates and Times
+#######################################################
+
+LocalDate date = LocalDate.of(2020, Month.JANUARY, 20);
+date.plusDays(10);
+System.out.println(date); 
+
+Output: 2020-01-20
+
+LocalDate available methods:
+----------------------------
+plusYears/ minusYears 
+plusMonths/ minusMonths 
+plusWeeks/ minusWeeks 
+plusDays/ minusDays 
+
+LocalTime available methods:
+----------------------------
+plusHours/ minusHours 
+plusMinutes/ minusMinutes 
+plusSeconds/ minusSeconds 
+plusNanos/ minusNanos 
+
+All the above methods are available for LocalDateTime, ZonedDateTime and Instant too.
+
+-------------------------------------------------------------------
+java.time.temporal.Temporal interface
+-------------------------------------------------------------------
+LocalTime, LocalDate, LocalDateTime, ZonedDateTime and Instant implements Temporal interface.
+Temporal interface has below methods and subclasses has overridden version. 
+
+default Temporal	minus(long amountToSubtract, TemporalUnit unit)
+Returns an object of the same type as this object with the specified period subtracted.
+
+default Temporal	minus(TemporalAmount amount)
+Returns an object of the same type as this object with an amount subtracted.
+
+Temporal	plus(long amountToAdd, TemporalUnit unit)
+Returns an object of the same type as this object with the specified period added.
+Note: Its not a default method.
+
+default Temporal	plus(TemporalAmount amount)
+Returns an object of the same type as this object with an amount added.
+
+-------------------------------------------------------------------
+TemporalAmount 's are Period and Duration
+
+TemporalUnit 's are ChronoUnit 
+
+(ex: NANOS, SECONDS, MILLIS, MINUTES, HOURS, 
+HALF_DAYS, DAYS, WEEKS, MONTHS, YEARS, 
+DECADES, CENTURIES, MILLENNIA, ERAS, FOREVER)
+
+#######################################################
+Working with Periods
+#######################################################
+
+LocalDate has toEpochDay(), which is the number of days since January 1, 1970.
+
+LocalDateTime and ZonedDateTime have toEpochSecond(), which is the number of
+seconds since January 1, 1970.
+
+LocalTime does not have an epoch method.
+
+You cannot chain methods when creating a Period. The following
+code looks like it is equivalent to the everyYearAndAWeek example, but it’s not. Only the
+last method is used because the Period of methods are static methods.
+
+Period wrong = Period.ofYears(1).ofWeeks(1); // every week
+which is equivalent to 
+Period wrong = Period.ofWeeks(1); // every week
+should be written like 
+Period correct = Period.of(1, 0, 7); // every year + one week
+
+System.out.printIn(Period.of(1,2,3));
+P1Y2M3D
+Period(mandatory)#years#months#days
+System.out.println(Period.ofMonths(3));
+P3M
+System.out.println(Period.of(0, 20, 47));
+The output is P20M47D.
+System.out.println(Period.ofWeeks(3));
+This one outputs P21D
+
+LocalTime.of(6, 15)
+		.plus(Period.ofDays(1)); // -> runtime UnsupportedTemporalTypeException
+LocalTime.of(6, 15)
+		.plus(Duration.ofDays(1)); // -> No Exception
+
+3: LocalDate date = LocalDate.of(2015, 1, 20);
+4: LocalTime time = LocalTime.of(6, 15);
+5: LocalDateTime dateTime = LocalDateTime.of(date, time);
+6: Period period = Period.ofMonths(1);
+7: System.out.println(date.plus(period)); // 2015–02–20
+8: System.out.println(dateTime.plus(period)); // 2015–02–20T06:15
+9: System.out.println(time.plus(period)); // UnsupportedTemporalTypeException
+
+#######################################################
+Working with Durations
+#######################################################
+
+ofDays available in both Period and Duration.
+
+Duration daily = Duration.ofDays(1); // PT24H
+Duration hourly = Duration.ofHours(1); // PT1H
+
+Duration everyMinute = Duration.ofMinutes(1); // PT1M
+Duration everyMinute = Duration.ofSeconds(60); // PT1M
+
+Duration everyTenSeconds = Duration.ofSeconds(10); // PT10S
+Duration everyMilli = Duration.ofMillis(1); // PT0.001S
+Duration everyNano = Duration.ofNanos(1); // PT0.000000001S
+
+ChronoUnit is a great way to determine how far apart two Temporal values are. 
+Temporal includes LocalDate, LocalTime, and so on.
+
+LocalDate.now())
+		.plus(Period.ofDays(1)); // -> NO Exception
+LocalDate.now
+		.plus(Duration.ofDays(1)); // -> runtime UnsupportedTemporalType
+LocalDate.of(2015, 1, 20)
+		 .plus(Duration.ofHours(23)); // -> // UnsupportedTemporalTypeException
+		 
+7: LocalDate date = LocalDate.of(2015, 1, 20);
+8: LocalTime time = LocalTime.of(6, 15);
+9: LocalDateTime dateTime = LocalDateTime.of(date, time);
+10: Duration duration = Duration.ofHours(23);
+11: System.out.println(dateTime.plus(duration)); // 2015–01–21T05:15
+12: System.out.println(time.plus(duration)); // 05:15
+13: System.out.println(date.plus(duration)); // UnsupportedTemporalException
+
+LocalDate date = LocalDate.of(2015, 5, 25);
+Period period = Period.ofDays(1);
+Duration days = Duration.ofDays(1);
+System.out.println(date.plus(period)); // 2015–05–26
+System.out.println(date.plus(days)); // Unsupported unit: Seconds
+
+LocalDate, we are required to use Period. Duration has time
+units in it, even if we don’t see them and they are meant only for objects with time.
+
+Table 5. 4 Where to use Duration and Period
+-------------------------------------------
+Can Use with Period? Can Use with Duration?
+-------------------------------------------
+LocalDate 		Yes 		No
+LocalDateTime 	Yes 		Yes
+LocalTime 		No 			Yes
+ZonedDateTime 	Yes 		Yes
+-------------------------------------------
+
+#######################################################
+Working with Instants
+#######################################################
+
+The Instant class represents a specific moment in time in the GMT time zone.
+
+LocalDate date = LocalDate.of(2015, 5, 25);
+LocalTime time = LocalTime.of(11, 55, 00);
+ZoneId zone = ZoneId.of("US/Eastern");
+ZonedDateTime zonedDateTime = ZonedDateTime.of(date, time, zone);
+Instant instant = zonedDateTime.toInstant(); // 2015–05–25T15:55:00Z
+System.out.println(zonedDateTime); // 2015–05–25T11:55–04:00[US/Eastern]
+System.out.println(instant); // 2015–05–25T15:55:00Z
+
+You cannot convert a LocalDateTime to an Instant. Remember that an Instant is a
+point in time.
+
+Instant nextDay = instant.plus(1, ChronoUnit.DAYS);
+System.out.println(nextDay); // 2015–05–26T15:55:00Z
+Instant nextHour = instant.plus(1, ChronoUnit.HOURS);
+System.out.println(nextHour); // 2015–05–25T16:55:00Z
+Instant nextWeek = instant.plus(1, ChronoUnit.WEEKS); // exception
+
+It’s weird that an Instant displays a year and month while preventing you from doing
+math with those fields. Unfortunately, you need to memorize this fact.
+
+#######################################################
+Accounting for Daylight Savings Time
+#######################################################
+
+Moving forward 
+---------------
+LocalDate date = LocalDate.of(2016, Month.MARCH, 13);
+LocalTime time = LocalTime.of(1, 30);
+ZoneId zone = ZoneId.of("US/Eastern");
+ZonedDateTime dateTime = ZonedDateTime.of(date, time, zone);
+System.out.println(dateTime); // 2016–03–13T01:30–05:00[US/Eastern]
+dateTime = dateTime.plusHours(1);
+System.out.println(dateTime); // 2016–03–13T03:30–04:00[US/Eastern]
+
+Notice that two things change in this example. The time jumps from 1:30 to 3:30. The
+UTC offset also changes.
+
+Moving backwards
+----------------
+LocalDate date = LocalDate.of(2016, Month.NOVEMBER, 6);
+LocalTime time = LocalTime.of(1, 30);
+ZoneId zone = ZoneId.of("US/Eastern");
+ZonedDateTime dateTime = ZonedDateTime.of(date, time, zone);
+System.out.println(dateTime); // 2016–11–06T01:30–04:00[US/Eastern]
+dateTime = dateTime.plusHours(1);
+System.out.println(dateTime); // 2016–11–06T01:30–05:00[US/Eastern]
+dateTime = dateTime.plusHours(1);
+System.out.println(dateTime); // 2016–11–06T02:30–05:00[US/Eastern]
+
+Adjustment
+----------
+LocalDate date = LocalDate.of(2016, Month.MARCH, 13);
+LocalTime time = LocalTime.of(2, 30);
+ZoneId zone = ZoneId.of("US/Eastern");
+ZonedDateTime dateTime = ZonedDateTime.of(date, time, zone);
+System.out.println(dateTime); // 2016–03–13T03:30–04:00[US/Eastern]
+Java is smart enough to know that there is no 2:30 a.m. that night and switches over to
+the appropriate GMT offset.
+
+=========================================================
+Formatting Dates and Times (java.time.format)
+=========================================================
+
+1)
+DateTimeFormatter f = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT);
+f.format(localDate) - Legal—shows whole object
+f.format(localDateTime) or(zonedDateTime) - Legal—shows just date part
+f.format(localTime) - Throws runtime exception
+
+2)
+DateTimeFormatter f = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT);
+f.format(localDate) - Throws runtime exception
+f.format(localDateTime) or(zonedDateTime) - Legal—shows whole object
+f.format(localTime) - Throws runtime exception
+
+3)
+DateTimeFormatter f = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT);
+f.format(localDate) - Throws runtime exception
+f.format(localDateTime) or(zonedDateTime) - Legal—shows just time part
+f.format(localTime) - Legal—shows whole object
+
+4)
+DateTimeFormatter f = DateTimeFormatter.ofPattern("MMMM dd, yyyy, hh:mm");
+System.out.println(dateTime.format(f)); // January 20, 2020, 11:12
+
+Passing Locale to DateTimeFormatter
+------------------------------------
+Can pass locale to the consturctor using ofPattern
+5) DateTimeFormatter f = DateTimeFormatter.ofPattern("MMMM dd, yyyy, hh:mm", new Locale("en", "IN");
+
+Can NOT pass locale to the constructor.
+6) DateTimeFormatter f = 
+			DateTimeFormatter.ofLocalizedXXXXXX(FormatStyle.SHORT)
+			 				 .withLocale(locale);
+
+							 Enum Constant Detail
+---------------------------------------------------------							 
+FormatStyle
+---------------------------------------------------------							 
+public static final FormatStyle FULL
+Full text style, with the most detail. For example, the format might be 'Tuesday, April 12, 1952 AD' or '3:30:42pm PST'.
+
+public static final FormatStyle LONG
+Long text style, with lots of detail. For example, the format might be 'January 12, 1952'.
+
+public static final FormatStyle MEDIUM
+Medium text style, with some detail. For example, the format might be 'Jan 12, 1952'.
+
+public static final FormatStyle SHORT
+Short text style, typically numeric. For example, the format might be '12.13.52' or '3:30pm'.
+
+=========================================================
+Using DateFormat (java.text)
+=========================================================
+
+For formatting dates 
+DateFormat.getDateInstance()
+DateFormat.getDateInstance(style)
+DateFormat.getDateInstance(style, locale)
+
+For formatting times 
+DateFormat.getTimeInstance()
+DateFormat.getTimeInstance(style)
+DateFormat.getTimeInstance(style, locale)
+
+For formatting dates and times 
+DateFormat.getDateTimeInstance()
+DateFormat.getDateTimeInstance(dateStyle, timeStyle)
+DateFormat.getDateTimeInstance(dateStyle, timeStyle, locale)
+
+Get a default date/time formatter that uses the SHORT style for both the date and the time.
+DateFormat.getInstance() 		
+	is equivalent to 
+		DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
+
+DateFormat dtf = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.FULL);
+System.out.println(dtf.format(d)); //Jul 4, 2015 12:00:00 AM EDT
+
+#######################################################
+Adding Internationalization and Localization
+#######################################################
+
+=========================================================
+Picking a Locale
+=========================================================
+1) 
+System.out.println("default locale: " + Locale.getDefault()); //sv_SE
+
+2)
+System.out.println(Locale.GERMAN); // de
+System.out.println(Locale.GERMANY); // de_DE
+
+3)
+System.out.println(new Locale("fr")); // fr
+System.out.println(new Locale("hi", "IN")); // hi_IN
+
+4)
+Locale l2 = new Locale.Builder() // bad but legal
+.setRegion("us")
+.setLanguage("EN")
+.build();
+
+Locale.Builder also lets you do other bad things like create a blank Locale . Please don’t.
+
+As practice, make sure that you understand why each of these Locale s is invalid:
+
+US // can have a language without a country, but not the reverse
+enUS // missing underscore
+US_en // the country and language are reversed
+EN // language must be lowercase
+The corrected versions are en and en_US.
+
+Changing default Locale
+-----------------------
+System.out.println(Locale.getDefault()); // en_US
+Locale locale = new Locale("fr");
+Locale.setDefault(locale); // change the default
+System.out.println(Locale.getDefault()); // fr
+
+=========================================================
+Using a Resource Bundle
+=========================================================
+
+A resource bundle contains the local specific objects to be used by a program.
+
+ResourceBundle.getBundle("name");
+ResourceBundle.getBundle("name", locale);
+
+If we don’t have a country-specific resource bundle, Java will use a language-specific one.
+
+--------------------------------------------------------
+Property File Format
+--------------------------------------------------------
+animal=dolphin
+animal:dolphin
+animal dolphin
+■■ If a line begins with # or !, it is a comment.
+■■ Spaces before or after the separator character are ignored.
+■■ Spaces at the beginning of a line are ignored.
+■■ Spaces at the end of a line are NOT ignored.
+■■ End a line with a backslash if you want to break the line for readability.
+■■ You can use normal Java escape characters like \t and \n.
+Putting these together, we can write the following:
+# one comment
+! another comment
+key = value\tafter tab
+long = abcdefghijklm\
+nopqrstuvwxyz
+Printing out these two properties in a program gives us this:
+value → after tab
+abcdefghijklmnopqrstuvwxyz
+
+In addition to ResourceBundle, Java supports a class named Properties. It is like a Map (java.util.Hashtable)
+
+Properties has some additional features, including being able to pass a default.
+
+System.out.println(props.getProperty("notReallyAProperty"));
+System.out.println(props.getProperty("notReallyAProperty", "123"));
+The first line prints null, since that property doesn’t exist. The second prints 123
+
+--------------------------------------------------------
+Creating a Java Class Resource Bundle
+--------------------------------------------------------
+
+To implement a resource bundle in Java, you create a class with the same name that you
+would use for a property file. 
+
+The ListResourceBundle abstract class leaves one method for subclasses to implement.
+
+public class Zoo_en extends ListResourceBundle
+
+There are two main advantages of using a Java class instead of a property file for a
+resource bundle:
+■■ You can use a value type that is not a String.
+■■ You can create the values of the properties at runtime.
+
+--------------------------------------------------------
+Determining Which Resource Bundle to Use
+--------------------------------------------------------
+
+Java class resource bundles are given preference.
+
+■■ Always look for the property file after the matching Java class.
+■■ Drop one thing at a time if there are no matches. First drop the country and then the
+language.
+■■ Look at the default locale and the default resource bundle last.
+
+Lets say, default locale is en_US and your using RB.getBundle("Zoo", new Locale("fr", "CA");
+1) Zoo_fr_CA.java
+2) Zoo_fr_CA.properties
+3) Zoo_fr.java
+4) Zoo_fr.properties
+5) Zoo_en_US.java
+6) Zoo_en_US.properties
+7) Zoo_en.java
+8) Zoo_en.properties
+9) Zoo.java
+10) Zoo.properties
+11) MissingResourceException
+
+there is a twist. The above steps are for finding the matching resource bundle to use as a base.
+
+Matching Resource Bundle Files Keys Can Come From
+Zoo_fr_FR.java 	  => Zoo_fr_FR.java / Zoo_fr.java / Zoo.java
+Zoo_fr.properties => Zoo_fr.properties / Zoo.properties
+
+Handling Variables Inside Resource Bundles
+------------------------------------------
+
+helloByName=Hello, {0}
+
+String format = rb.getString("helloByName");
+String formatted = MessageFormat.format(format, "Tammy");
+System.out.print(formatted);
+
+=========================================================
+Formatting Numbers (java.text)
+=========================================================
+
+A general purpose formatter 
+NumberFormat.getInstance()
+NumberFormat.getInstance(locale)
+
+Same as getInstance 		
+NumberFormat.getNumberInstance()
+NumberFormat.getNumberInstance(locale)
+
+For formatting monetary amounts
+NumberFormat.getCurrencyInstance()
+NumberFormat.getCurrencyInstance(locale)
+
+For formatting percentages 
+NumberFormat.getPercentInstance()
+NumberFormat.getPercentInstance(locale)
+
+Rounds decimal values before displaying (not on the exam)
+NumberFormat.getIntegerInstance()
+NumberFormat.getIntegerInstance(locale)
+
+The format classes are not thread-safe. Do not store them in instance variables
+or static variables.
+
+--------------------------------------------------------
+Formatting
+--------------------------------------------------------
+
+Number
+------
+NumberFormat us = NumberFormat.getInstance(Locale.US);
+System.out.println(us.format(attendeesPerMonth)); // 266,666
+
+Currency
+--------
+double price = 48;
+NumberFormat sv = NumberFormat.getCurrencyInstance(new Locale("sv", "SE"));
+System.out.println(sv.format(price)); //48,00 kr
+
+--------------------------------------------------------
+Parsing
+--------------------------------------------------------
+
+NumberFormat en = NumberFormat.getInstance(Locale.US);
+NumberFormat fr = NumberFormat.getInstance(Locale.FRANCE);
+String s = "40.45";
+System.out.println(en.parse(s)); // 40.45
+System.out.println(fr.parse(s)); // 40
+
+=========================================================
+Using DecimalFormat
+=========================================================
+
+There is a special subclass of NumberFormat called DecimalFormat, which is typically used
+when you want specific formatting.
+
+# means to omit the position if no digit exists for it.
+0 means to put a 0 in the position if no digit exists for it.
+
+12: double d = 1234567.437;
+13: DecimalFormat one = new DecimalFormat("###,###,###.###");
+14: System.out.println(one.format(d)); // 1,234,567.437
+15:
+16: DecimalFormat two = new DecimalFormat("000,000,000.00000");
+17: System.out.println(two.format(d)); // 001,234,567.43700
+18:
+19: DecimalFormat three = new DecimalFormat("$#,###,###.##");
+20: System.out.println(three.format(d)); // $1,234,567.44

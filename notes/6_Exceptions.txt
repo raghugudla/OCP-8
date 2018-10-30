@@ -1,0 +1,102 @@
+Chapter 6: Exceptions
+-------------------------------------------
+
+#######################################################
+Using Multi-catch
+#######################################################
+
+catch(Exception1 e | Exception2 e | Exception3 e) // DOES NOT COMPILE
+catch(Exception1 e1 | Exception2 e2 | Exception3 e3) // DOES NOT COMPILE
+catch(Exception1 | Exception2 | Exception3 e)
+
+try {
+throw new IOException();
+} catch (FileNotFoundException | IOException e) { } // DOES NOT COMPILE
+
+FileNotFoundException is a subclass of IOException. Specifying it in the multi-catch is redundant.
+
+#######################################################
+Using Try-With-Resources
+#######################################################
+
+one or more resources can be opened in the try clause. Also, notice that parentheses are used to
+list those resources and semicolons are used to separate the declarations. This works just
+like declaring multiple indexes in a for loop;
+
+30: public void newApproach(Path path1, Path path2) throws IOException {
+31: 	try (BufferedReader in = Files.newBufferedReader(path1);
+32: 	 	 BufferedWriter out = Files.newBufferedWriter(path2)) {
+33: 			out.write(in.readLine());
+34: 	}
+35: }
+
+Only a try-with-resources statement is permitted to omit both the catch and finally blocks. 
+A traditional try statement must have either or both.
+
+a try-with-resources statement is still allowed to have catch and/
+or finally blocks. They are run in addition to the implicit one. The implicit finally block
+runs before any programmer-coded ones.
+
+The resources created in the try clause are only in scope within the try block. This is
+another way to remember that the implicit finally runs before any catch/finally blocks
+that you code yourself.
+
+=========================================================
+AutoCloseable
+=========================================================
+
+The AutoCloseable interface has only one method to implement:
+public void close() throws Exception;
+
+AutoCloseable vs. Closeable
+---------------------------
+
+The AutoCloseable interface was introduced in Java 7. Before that, another interface
+existed called Closeable. It was similar to what the language designers wanted, with the
+following exceptions:
+■■ Closeable restricts the type of exception thrown to IOException.
+■■ Closeable requires implementations to be idempotent.
+
+=========================================================
+Suppressed Exceptions
+=========================================================
+
+if two exceptions are thrown while closing resources Then Java tries to close both
+cages automatically. t2 is closed first, since Java closes resources in the reverse order from
+which it created them. This throws an exception. Since it is the first exception to occur,
+it becomes the primary exception. Then t1 is closed. Since an exception has already been
+thrown, this one becomes a suppressed exception.
+
+keep in mind that suppressed exceptions apply only to exceptions thrown in the
+try clause.
+
+■■ Resources are closed after the try clause ends and before any catch/finally clauses.
+■■ Resources are closed in the reverse order from which they were created.
+
+---------------------------------------------------------------------------------------
+Methods can throw any number of checked exceptions and even if they cant throw them all.
+
+	void fileBlowUp() throws IOException, SQLException {
+		throw new IOException();
+	}
+
+catching checked exceptions should match with called methods signature of throws.
+If method is not throwing SQLException you cant write the catch of it. can't compile.
+
+catch(Exception e) is a special, you can surround method calls which are not throwing any checked exceptions.
+because catch(Exception e) treated as for catching RuntimeExceptions.
+
+Special case of exception:
+
+	void run() throws IOException { /* throwing IOExc after catching it as Exception.*/
+		
+		try(SomeConn conn = new SomeConn()) {
+			
+			throw new IOException();
+			
+		} catch (Exception e) {
+			
+			throw e;
+		}
+	}
+

@@ -1,0 +1,746 @@
+Chapter 9: NIO.2
+---------------------------------------------------------
+
+=========================================================
+Introducing Path
+=========================================================
+
+java.nio.file.Path object represents a hierarchical path on the
+storage system to a file or directory. In this manner, Path is a direct replacement for the
+legacy java.io.File class, and conceptually it contains many of the same properties.
+
+Unlike the File class, the Path interface contains support for symbolic links. A symbolic
+link is a special file within an operating system that serves as a reference or pointer to another
+file or directory.
+
+Why Is Path an Interface?
+The reason why Path is an interface and not a class is that
+creating a file or directory is considered a file system–dependent task in NIO.2.
+If you didn’t use the factory pattern to create an instance, you would have to know what
+the underlying file system was and use this in every create method.
+
+Creating Paths
+--------------
+
+Paths (creates) => Path
+FileSystems (creates) => FileSystem (creates) => Path
+Path uses Files
+Path converts File and URI
+
+1)
+Path path1 = Paths.get("pandas/cuddly.png");
+Path path2 = Paths.get("c:\\zooinfo\\November\\employees.txt");
+Path path3 = Paths.get("/home/zoodirector");
+
+The first example creates a Path reference to a relative file in the current working directory.
+The second example creates a Path reference to an absolute file in a Windows-based
+system. The third example creates a Path reference to an absolute directory in a Linux or
+Mac-based system.
+
+most JVM implementations support both forward and backward slashes regardless of the
+file system, allowing the same code to run on multiple operating systems without having to
+rewrite the slashes.
+
+2)
+Path path1 = Paths.get("pandas","cuddly.png");
+Path path2 = Paths.get("c:","zooinfo","November","employees.txt");
+Path path3 = Paths.get("/","home","zoodirector");
+
+3)
+Path path1 = Paths.get(new URI("file://pandas/cuddly.png")); // THROWS EXCEPTION
+// AT RUNTIME, as this is relative path not an unique RI.
+Path path2 = Paths.get(new URI("file:///c:/zoo-info/November/employees.txt"));
+Path path3 = Paths.get(new URI("file:///home/zoodirectory"));
+
+4)
+Path path1 = FileSystems.getDefault().getPath("pandas/cuddly.png");
+Path path2 = FileSystems.getDefault().getPath("c:","zooinfo","November", "employees.txt");
+Path path3 = FileSystems.getDefault().getPath("/home/zoodirector");
+
+5)
+FileSystem fileSystem = FileSystems.getFileSystem(new URI("http://www.selikoff.net"));
+Path path = fileSystem.getPath("duck.txt");
+
+Working with Legacy File Instances
+-----------------------------------
+When Path was added in Java 7, the legacy java.io.File class was updated with a new
+method, toPath(), that operates on an instance File variable:
+
+File file = new File("pandas/cuddly.png");
+Path path = file.toPath();
+
+For backward compatibility, the Path interface also contains a method toFile() to
+return a File instance:
+
+Path path = Paths.get("cuddly.png");
+File file = path.toFile();
+
+=========================================================
+Interacting with Paths and Files
+=========================================================
+
+Common optional arguments in NIO.2
+----------------------------------
+NOFOLLOW_LINKS Test file existing Read file data Copy file Move file
+If provided, symbolic links when encountered will not be traversed. 
+Useful for performing operations on symbolic links themselves rather than their target.
+
+FOLLOW_LINKS Traverse a directory tree 
+If provided, symbolic links when encountered will be traversed.
+
+COPY_ATTRIBUTES Copy file If provided, all metadata about a file will be copied with it.
+
+REPLACE_EXISTING Copy file Move file
+If provided and the target file exists, it will be replaced; otherwise, if it is not provided,
+an exception will be thrown if the file already exists.
+
+ATOMIC_MOVE Move file The operation is performed in an atomic manner
+within the file system, ensuring that any process using the file sees only a complete
+record. Method using it may throw an exception if the feature is unsupported by the file system.
+If the file system does not support this feature, an AtomicMoveNotSupportedException will be thrown.
+
+the Path.getName(int) method is zero-indexed, with the file system root excluded from the path
+components.
+
+Creating a New Path with subpath()
+----------------------------------
+Path path = Paths.get("/mammal/carnivore/raccoon.image");
+Path is: /mammal/carnivore/raccoon.image
+Subpath from 0 to 3 is: mammal/carnivore/raccoon.image
+Subpath from 1 to 3 is: carnivore/raccoon.image
+Subpath from 1 to 2 is: carnivore
+
+Notice that the 0-indexed element is mammal in this example and not the root
+directory; therefore, the maximum index that can be used is 3.
+
+System.out.println("Subpath from 0 to 4 is: "+path.subpath(0,4)); // THROWS EXCEPTION AT RUNTIME
+System.out.println("Subpath from 1 to 1 is: "+path.subpath(1,1)); // leading to an empty path value. THROWS EXCEPTION AT RUNTIME
+
+Using Path Symbols
+------------------
+.(single dot) A reference to the current directory
+..(double dot) A reference to the parent of the current directory
+
+../bear.txt refers to a file named bear.txt in the parent
+of the current directory. Likewise, the path value ./penguin.txt refers to a file named
+penguin.txt in the current directory
+../../lion.data refers to a file lion.data that is two directories up
+from the current working directory.
+
+Deriving a Path with relativize()
+---------------------------------
+1) relativize both relative paths
+Path path1 = Paths.get("fish.txt");
+Path path2 = Paths.get("birds.txt");
+System.out.println(path1.relativize(path2));
+System.out.println(path2.relativize(path1));
+
+The code snippet produces the following output when executed:
+..\birds.txt
+..\fish.txt
+
+2) relativize both absolute paths
+Path path3 = Paths.get("E:\\habitat");
+Path path4 = Paths.get("E:\\sanctuary\\raven");
+System.out.println(path3.relativize(path4));
+System.out.println(path4.relativize(path3));
+This code snippet produces the following output when executed:
+..\sanctuary\raven
+..\..\habitat
+
+3) relativize relative and absolute path 
+The relativize() method requires that both paths be absolute or both relative, and
+it will throw an IllegalArgumentException if a relative path value is mixed with an
+absolute path value. For example, the following would throw an exception at runtime:
+Path path1 = Paths.get("/primate/chimpanzee");
+Path path2 = Paths.get("bananas.txt");
+Path1.relativize(path3); // THROWS EXCEPTION AT RUNTIME
+
+4) special case for windows
+On Windows-based systems, it also requires that if absolute paths are used, then both
+paths must have the same root directory or drive letter. For example, the following would
+also throw an IllegalArgumentException at runtime in a Windows-based system since
+they use different roots:
+Path path3 = Paths.get("c:\\primate\\chimpanzee");
+Path path4 = Paths.get("d:\\storage\\bananas.txt");
+path3.relativize(path4); // THROWS EXCEPTION AT RUNTIME
+
+Joining Path Objects with resolve()
+-----------------------------------
+1) absolute and relative paths resolve
+final Path path1 = Paths.get("/cats/../panther");
+final Path path2 = Paths.get("food");
+System.out.println(path1.resolve(path2));
+
+The code snippet generates the following output:
+/cats/../panther/food
+
+like the relativize() method, the resolve()
+method does not clean up path symbols, such as the parent directory .. symbol. For that,
+you’ll need to use the normalize() method
+
+2) two absolute paths resolve
+final Path path1 = Paths.get("/turkey/food");
+final Path path2 = Paths.get("/tiger/cage");
+System.out.println(path1.resolve(path2));
+
+Since the input parameter path2 is an absolute path, the output would be the following:
+/tiger/cage
+
+Checking for File Existence with toRealPath()
+---------------------------------------------
+It is similar to the toAbsolutePath() method in that it can convert a relative path
+to an absolute path, except that it also verifies that the file referenced by the path actually
+exists, and thus it throws a checked IOException at runtime if the file cannot be located. It
+is also the only Path method to support the NOFOLLOW_LINKS option.
+
+System.out.println(Paths.get("/zebra/food.source").toRealPath()); // /horse/food.txt
+System.out.println(Paths.get(".././food.txt").toRealPath());	  // /horse/food.txt
+
+the absolute and relative paths both resolve to the same absolute file
+
+System.out.println(Paths.get(".").toRealPath());
+
+=========================================================
+Interacting with Files
+=========================================================
+
+Unlike the methods in the Path and
+Paths class, most of the options within the Files class will throw an exception if the fi le to
+which the Path refers does not exist.
+
+Be wary of File vs. Files on the exam
+the NIO.2 Files helper class is
+in no way related to the File class, as the Files class operates on Path instances, not
+File instances. Keep in mind that File belongs to the legacy java.io API, while Files
+belongs to the NIO.2 API.
+
+The Files class contains numerous static methods for interacting with fi les, with most
+taking one or two Path objects as arguments.
+
+Testing a Path with exists()
+----------------------------
+Files.exists(Paths.get("/ostrich/feathers.png"));
+Files.exists(Paths.get("/ostrich"));
+The fi rst example checks whether a fi le exists, while the second example checks whether a
+directory exists. You can see that this method does not throw an exception if the fi le does not
+exist
+
+Testing Uniqueness with isSameFile()
+------------------------------------
+The Files.isSameFile(Path,Path) method first checks if the Path objects are equal in terms of equal() ,
+and if so, it automatically returns true without checking to see if either file exists. If the
+Path object equals() comparison returns false , then it locates each file to which the
+path refers in the file system and determines if they are the same, throwing a checked
+IOException if either fi le does not exist.
+Despite the name, the method also determines if two Path objects refer to
+the same directory.
+
+This isSameFile() method does not compare the contents of the file. For
+example, two files may have identical content and attributes, but if they
+are in different locations, then this method will return false .
+
+Making Directories with createDirectory() and createDirectories()
+-----------------------------------------------------------------
+Files.createDirectory(Path) method to create
+a directory. There is also a plural form of the method called createDirectories() , which
+like mkdirs() creates the target directory along with any nonexistent parent directories
+leading up to the target directory in the path.
+
+createDirectory will throw exception if the directory already exists
+createDirectories doen't throw exception if the directories are already exist
+
+Duplicating File Contents with copy()
+-------------------------------------
+Files.copy(Path,Path) , which copies a
+file or directory from one location to another. The copy() method throws the checked
+IOException , such as when the file or directory does not exist or cannot be read.
+
+Directory copies are shallow rather than deep, meaning that files and subdirectories
+within the directory are not copied.
+
+try {
+Files.copy(Paths.get("/panda"), Paths.get("/panda-save"));
+Files.copy(Paths.get("/panda/bamboo.txt"), Paths.get("/panda-save/bamboo.txt"));
+} catch (IOException e) {
+// Handle file I/O exception...
+}
+
+By default, copying files and directories will traverse symbolic links, although it
+will not overwrite a file or directory if it already exists, nor will it copy file attributes.
+These behaviors can be altered by providing the additional options NOFOLLOW_LINKS ,
+REPLACE_EXISTING , and COPY_ATTRIBUTES , respectively
+
+Copying Files with java.io and NIO.2
+------------------------------------
+try (InputStream is = new FileInputStream("source-data.txt");
+OutputStream out = new FileOutputStream("output-data.txt")) {
+// Copy stream data to file
+Files.copy(is, Paths.get("c:\\mammals\\wolf.txt"));
+// Copy file data to stream
+Files.copy(Paths.get("c:\\fish\\clown.xsl"), out);
+} catch (IOException e) {
+// Handle file I/O exception...
+}
+
+Changing a File Location with move()
+------------------------------------
+The Files.move(Path,Path) method moves or renames a fi le or directory within the fi le
+system. Like the copy() method, the move() method also throws the checked IOException
+in the event that the fi le or directory could not be found or moved.
+
+Files.move(Paths.get("c:\\zoo"), Paths.get("c:\\zoo-new"));
+Files.move(Paths.get("c:\\user\\addresses.txt"),
+Paths.get("c:\\zoo-new\\addresses.txt"));
+} catch (IOException e) {
+// Handle file I/O exception...
+}
+
+moving an empty directory across a drive is supported, 
+moving a non-empty directory across a drive
+will throw an NIO.2 DirectoryNotEmptyException .
+
+By default, the move() method will follow links, throw an exception if the fi le
+already exists, and not perform an atomic move. These behaviors can be changed by
+providing the optional values NOFOLLOW_LINKS , REPLACE_EXISTING , or ATOMIC_MOVE ,
+respectively, to the method. If the fi le system does not support atomic moves, an
+AtomicMoveNotSupportedException will be thrown at runtime.
+
+Removing a File with delete() and deleteIfExists()
+--------------------------------------------------
+The Files.delete(Path) method deletes a fi le or empty directory within the fi le system.
+The delete() method throws the checked IOException under a variety of circumstances.
+For example, if the path represents a non-empty directory, the operation will throw the
+runtime DirectoryNotEmptyException . If the target of the path is a symbol link, then the
+symbolic link will be deleted, not the target of the link.
+The deleteIfExists(Path) method is identical to the delete(Path) method, except
+that it will not throw an exception if the fi le or directory does not exist, but instead it will
+return a boolean value of false . It will still throw an exception if the fi le or directory does
+exist but fails, such as in the case of the directory not being empty.
+
+Reading and Writing File Data with newBufferedReader() and
+newBufferedWriter()
+----------------------------------------------------------
+Files.newBufferedReader(Path,Charset) , reads the file specified
+at the Path location using a java.io.BufferedReader object. It also requires a Charset
+value to determine what character encoding to use to read the file.
+
+Files.newBufferedWriter(Path,Charset) , writes to a file speci-
+fied at the Path location using a BufferedWriter . Like the reader method, it also takes a
+Charset value
+
+Reading Files with readAllLines()
+---------------------------------
+The Files.readAllLines() method reads all of the lines of a text file and returns the
+results as an ordered List of String values.
+
+Be aware that the entire file is read when readAllLines() is called, with the resulting
+String array storing all of the contents of the file in memory at once. Therefore, if the file
+is significantly large, you may encounter an OutOfMemoryError trying to load all of it into
+memory.
+
+=========================================================
+Understanding File Attributes
+=========================================================
+The Files class also provides numerous methods accessing file and
+directory metadata, referred to as file attributes.
+
+Discovering Basic File Attributes
+---------------------------------
+
+isDirectory(), isRegularFile(), and isSymbolicLink()
+----------------------------------------------------
+it is possible for isRegularFile() to return
+true for a symbolic link, as long as the link resolves to a regular file.
+
+Files.isDirectory(Paths.get("/canine/coyote/fur.jpg"));
+Files.isRegularFile(Paths.get("/canine/types.txt"));
+Files.isSymbolicLink(Paths.get("/canine/coyote"));
+
+isDirectory() , isRegularFile() , and isSymbolicLink() 
+do not throw an exception if the path does not exist
+
+Checking File Visibility with isHidden()
+----------------------------------------
+The isHidden() method throws the checked IOException , 
+as there may be an I/O error reading the underlying file information.
+
+Testing File Accessibility with isReadable() and isExecutable()
+---------------------------------------------------------------
+
+System.out.println(Files.isReadable(Paths.get("/seal/baby.png")));
+System.out.println(Files.isExecutable(Paths.get("/seal/baby.png")));
+
+The first example returns true if the baby.png file exists and its contents are readable,
+based on the permission rules of the underlying file system. 
+
+The second example returns
+true if the baby.png file is marked executable within the file system. Note that the file
+extension does not necessary determine whether a file is executable.
+
+isReadable() and isExecutable() methods do not throw exceptions if the file does not
+exist but instead return false, like the isDirectory() , isRegularFile() , and isSymbolicLink() methods.
+
+Reading File Length with size()
+-------------------------------
+The Files.size(Path) method is used to determine the size of the fi le in bytes as a long value. 
+The size() method throws the checked IOException if the fi le does not exist or if
+the process is unable to read the fi le information. 
+
+The Files.size() method is defined only on files. Calling Files.size()
+on a directory is system dependent and undefined. If you need to
+determine the size of a directory and its contents, you’ll need to walk the
+directory tree.
+
+getLastModifiedTime() and setLastModifiedTime()
+-----------------------------------------------
+The Files class provides the method Files.getLastModifiedTime(Path) , which returns
+a FileTime object to accomplish this. 
+
+The FileTime class is a simple container class that stores the date/time information about 
+when a file was accessed, modifi ed, or created. For
+convenience, it has a toMillis() method that returns the epoch time.
+
+Files.setLastModifiedTime(Path,FileTime) method. The FileTime class
+also has a static fromMillis() method that converts from the epoch time to a FileTime
+object. 
+
+Both of these methods have the ability to throw a checked IOException when the fi le is
+accessed or modifi ed.
+
+Managing Ownership with getOwner() and setOwner()
+-------------------------------------------------
+Files.getOwner(Path) method returns an instance of UserPrincipal that
+represents the owner of the fi le within the fi le system.
+
+Files.setOwner(Path,UserPrincipal). Note that the operating system may intervene when you
+try to modify the owner of a fi le and block the operation.
+
+Both the getOwner() and setOwner() methods can throw the checked exception IOException in
+case of any issues accessing or modifying the fi le.
+
+UserPrincipal owner = FileSystems.getDefault().getUserPrincipalLookupService()
+.lookupPrincipalByName("jane");
+Path path = ...
+
+UserPrincipal owner = path.getFileSystem().getUserPrincipalLookupService()
+.lookupPrincipalByName("jane");
+
+try {
+// Read owner of file
+Path path = Paths.get("/chicken/feathers.txt");
+System.out.println(Files.getOwner(path).getName());
+// Change owner of file
+UserPrincipal owner = path.getFileSystem()
+.getUserPrincipalLookupService().lookupPrincipalByName("jane");
+Files.setOwner(path, owner);
+// Output the updated owner information
+System.out.println(Files.getOwner(path).getName());
+} catch (IOException e) {
+// Handle file I/O exception...
+}
+
+=========================================================
+Improving Access with Views
+=========================================================
+
+Understanding Views
+-------------------
+The first method, Files.readAttributes() , returns a read-only view of the
+file attributes. 
+
+The second method, Files.getFileAttributeView() , returns the underlying
+attribute view, and it provides a direct resource for modifying file information.
+
+BasicFileAttributes BasicFileAttributeView 
+Basic set of attributes supported by all file systems
+
+DosFileAttributes DosFileAttributeView Attributes supported by DOS/
+Windows-based systems
+
+PosixFileAttributes PosixFileAttributeView Attributes supported by POSIX
+systems, such as UNIX, Linux, Mac, and so on
+
+Reading Attributes 
+------------------
+The NIO.2 API provides a Files.readAttributes(Path,Class<A>) method, which returns
+read-only versions of a file view.
+
+BasicFileAttributes
+-------------------
+Path path = Paths.get("/turtles/sea.txt");
+BasicFileAttributes data = Files.readAttributes(path, BasicFileAttributes.class);
+System.out.println("Is path a directory? "+data.isDirectory());
+System.out.println("Is path a regular file? "+data.isRegularFile());
+System.out.println("Is path a symbolic link? "+data.isSymbolicLink());
+System.out.println("Path not a file, directory, nor symbolic link? "+ data.isOther());
+System.out.println("Size (in bytes): "+data.size());
+System.out.println("Creation date/time: "+data.creationTime());
+System.out.println("Last modified date/time: "+data.lastModifiedTime());
+System.out.println("Last accessed date/time: "+data.lastAccessTime());
+System.out.println("Unique file identifier (if available): "+ data.fileKey());
+
+Modifying Attributes
+--------------------
+While the Files.readAttributes() method is useful for reading file data, it does not
+provide a direct mechanism for modifying file attributes. The NIO.2 API provides the
+Files.getFileAttributeView(Path,Class<V>) method, which returns a view object that
+we can use to update the file system–dependent attributes. We can also use the view object
+to read the associated file system attributes by calling readAttributes() on the view object.
+
+BasicFileAttributeView
+----------------------
+Path path = Paths.get("/turtles/sea.txt");
+BasicFileAttributeView view = Files.getFileAttributeView(path,BasicFileAttributeView.class);
+BasicFileAttributes data = view.readAttributes();
+FileTime lastModifiedTime = FileTime.fromMillis(data.lastModifiedTime().toMillis()+10_000);
+view.setTimes(lastModifiedTime,null,null);
+
+The NIO.2 API allows us to pass null for any date/time value that we do not wish to
+modify. For example, the following line of code would change only the last-modified
+date/time, leaving the other file date/time values unaffected:
+view.setTimes(lastModifiedTime,null,null);
+
+=========================================================
+The New Stream Methods
+=========================================================
+
+Streams API uses depth-first searching with a
+default maximum depth of Integer.MAX_VALUE .
+
+Walking a Directory
+-------------------
+The Files.walk(path) method returns a Stream<Path> object that
+traverses the directory in a depth-first, lazy manner.
+
+Keep in mind that when you create a Stream<Path> object using
+Files.walk() , the contents of the directory have not yet been traversed.
+
+there is an overloaded version of walk(Path,int) that takes a maximum directory depth
+integer value as the second parameter. A value of 0 indicates the current path record itself.
+
+Path path = Paths.get("/bigcats");
+try {
+Files.walk(path)
+.filter(p -> p.toString().endsWith(".java"))
+.forEach(System.out::println);
+} catch (IOException e) {
+// Handle file I/O exception...
+}
+
+Avoiding Circular Paths
+-----------------------
+Unlike our earlier NIO.2 methods, the walk() method will not traverse symbolic links by
+default.
+
+/birds/robin that contains a symbolic link called
+/birds/robin/allBirds that pointed to /birds . Trying to traverse the /birds/robin
+directory would result in an infinite loop since each time the allBirds subdirectory was
+reached, we would go back to the parent path.
+
+If you have a situation where you need to change the default behavior and traverse
+symbolic links, NIO.2 offers the FOLLOW_LINKS option as a vararg to the walk() method.
+It is recommended to specify an appropriate depth limit when this option is used. Also, be
+aware that when this option is used, the walk() method will track the paths it has visited,
+throwing a FileSystemLoopException if a cycle is detected.
+
+Searching a Directory
+---------------------
+Files.find(Path,int,BiPredicate) method behaves in a similar manner as the
+Files.walk() method, except that it requires the depth value to be explicitly set along
+with a BiPredicate to filter the data. Like walk() , find() also supports the FOLLOW_LINK
+vararg option.
+
+BiPredicate is an interface that takes two generic objects and returns 
+a boolean value of the form (T, U) -> boolean . In this case,
+the two object types are Path and BasicFileAttributes
+
+Stream<Path> stream = Files.find(path, 10, 
+(p,a) -> p.toString().endsWith(".java")
+&& a.lastModifiedTime().toMillis()>dateFilter);
+stream.forEach(System.out::println);
+
+Listing Directory Contents
+--------------------------
+java.io.File.listFiles() and Files.walk(Path, 1) is equals to Files.list(Path)
+
+Path path = Paths.get("ducks");
+Files.list(path)
+.filter(p -> !Files.isDirectory(p))
+.map(p -> p.toAbsolutePath())
+.forEach(System.out::println);
+
+Printing File Contents
+----------------------
+Files.readAllLines() and commented that using it to
+read a very large file could result in an OutOfMemoryError problem. Luckily, the NIO.2 API in
+Java 8 now includes a Files.lines(Path) method that returns a Stream<String> object and
+does not suffer from this same issue. The contents of the file are read and processed lazily,
+which means that only a small portion of the file is stored in memory at any given time.
+
+For the exam, you should be familiar with both readAllLines() and lines() and with
+which one returns a List and which one returns a Stream . This is even more difficult
+since the forEach() method can be called on both Stream and Collection objects.
+
+Comparing Legacy File and NIO.2 Methods
+---------------------------------------
+
+file.exists() Files.exists(path)
+file.getName() path.getFileName()
+file.getAbsolutePath() path.toAbsolutePath()
+file.isDirectory() Files.isDirectory(path)
+file.isFile() Files.isRegularFile(path)
+file.isHidden() Files.isHidden(path)
+file.length() Files.size(path)
+file.lastModified() Files.getLastModifiedTime(path)
+file.setLastModified(time) Files.setLastModifiedTime(path,fileTime)
+file.delete() Files.delete(path)
+file.renameTo(otherFile) Files.move(path,otherPath)
+file.mkdir() Files.createDirectory(path)
+file.mkdirs() Files.createDirectories(path)
+file.listFiles() Files.list(path)
+
+=========================================================
+Working with Directories
+=========================================================
+
+Reading a Directory with DirectoryStream
+----------------------------------------
+DirectoryStream<Path> stream = Files.newDirectoryStream(path);
+
+Path path = Paths.get("/user/home");
+try (DirectoryStream<Path> stream = Files.newDirectoryStream(path)) {
+	for(Path element: stream) {
+		System.out.println(element.getFileName()+"\t"+Files.isDirectory(element));
+	}
+}
+
+Remember for the exam that the DirectoryStream process traverses only
+a single directory and does not visit any subdirectories that it encounters.
+
+Walking a Directory Tree with FileVisitor
+-----------------------------------------
+The idea is simple. You create a class that implements the FileVisitor<Path> interface
+and then pass it to a Files.walkFileTree() method. The walkFileTree() method handles
+the complex process of loading the next directory and fi le for you, and it recursively calls
+the methods in your FileVisitor implementation as it encounters each entry.
+Understanding the FileVisitor Structure
+
+the FileVisitor<Path> interface requires four methods:
+
+visitFile(Path,BasicFileAttributes) throws IOException
+This method is called when a fi le is visited, and it automatically includes the fi le’s attributes in a
+BasicFileAttributes object.
+
+visitFileFailed(Path,IOException) throws IOException This method is called
+when a fi le cannot be visited along with exception information about the reason for the failure.
+
+preVisitDirectory(Path,BasicFileAttributes) throws IOException This
+method is called before a directory’s contents are visited, and it automatically includes the
+directory’s attributes in a BasicFileAttributes object.
+
+postVisitDirectory(Path,IOException) throws IOException This method is
+called after a directory’s contents are visited, and it includes exception information
+
+Each method in FileVisitor returns a FileVisitResult enum that instructs the process
+on what the next step in the walk should be by using the FileVisitor .
+
+Using the SimpleFileVisitor class
+---------------------------------
+SimpleFileVisitor that implements FileVisitor to the NIO.2
+API. While most of the methods in the SimpleFileVisitor class just return
+CONTINUE, visitFileFailed() and postVisitDirectory() rethrow any IOException that
+they encounter.
+
+To use the SimpleFileVisitor class, you simply extend it and overwrite the methods
+that you want to implement
+
+=========================================================
+Monitoring a Directory for Changes
+=========================================================
+Overview of WatchService API
+1. Create an instance of WatchService from the file system.
+2. Register each directory and event type.
+3. Create a loop that repeatedly queries the WatchService for changes.
+4. Retrieve a WatchKey .
+5. Retrieve all pending events for the WatchKey and do something with them.
+6. Reset the WatchKey .
+7. Once you no longer need the WatchService , close the resource.
+
+step 1 & 7:
+try (WatchService service = FileSystems.getDefault().newWatchService()) {
+
+Failure to close the WatchService after we have finished
+with it could lead to resource-contention issues within the file system.
+
+Registering for Events
+----------------------
+The next step is one of the most interesting, that is, determining what events we want
+to monitor. The WatchService can be used on any class that implements the Watchable
+interface, which requires the class to implement register() methods.
+
+try (WatchService service = FileSystems.getDefault().newWatchService()) {
+// Register for events
+Path zooData = Paths.get("/user/home/zoo/data");
+Path zooLog = Paths.get("/user/home/zoo/log");
+zooData.register(service,StandardWatchEventKinds.ENTRY_CREATE,
+StandardWatchEventKinds.ENTRY_DELETE,
+StandardWatchEventKinds.ENTRY_MODIFY);
+zooLog.register(service,StandardWatchEventKinds.ENTRY_MODIFY);
+}
+
+Looping Over the WatchService
+
+Retrieving a WatchKey
+---------------------
+poll()
+This method retrieves and removes the next WatchKey , returning null if none are
+present.
+
+poll(long,TimeUnit) 
+This method retrieves and removes the next WatchKey , waiting a
+specified amount of time if none are present. If the time limit is reached without any events,
+the method returns null .
+
+take() 
+This method retrieves and removes the next WatchKey , waiting indefinitely if
+none are present.
+
+Processing and Resetting the WatchKey
+-------------------------------------
+we request all
+available events by calling pollEvents() on our WatchKey instance. For each event found,
+we read and process the event details. The event details include the type of the event, which
+is retrieved by calling the kind() method. It also includes a reference to the Path associated
+with the event, which is retrieved by using the context() method.
+
+Failure to call the reset() method on the current WatchKey would result
+in not being able to retrieve any further WatchKey events. When using the
+WatchService API, it is critical not to skip the reset() method call.
+
+// Poll for events
+for(;;) {
+WatchKey key;
+try {
+key = service.take();
+} catch (InterruptedException x) {
+break;
+}
+// Retrieve events for key
+for (WatchEvent<?> event: key.pollEvents()) {
+WatchEvent.Kind<?> kind = event.kind();
+if (kind == StandardWatchEventKinds.OVERFLOW) {
+continue;
+}
+// Process event
+WatchEvent<Path> watchEvent = (WatchEvent<Path>)event;
+Path path = watchEvent.context();
+System.out.println("[eventType="+kind
++", path="+path.getFileName()+"]");
+}
+// Remember to always reset event key
+if(!key.reset()) {
+break;
+}
+
+
