@@ -8,7 +8,7 @@ import java.util.concurrent.Executors;
 public class CyclicBarrierEx {
     private int i = 0;
 
-    public CyclicBarrierEx(int i) {
+    private CyclicBarrierEx(int i) {
         this.i = i;
     }
 
@@ -42,11 +42,13 @@ public class CyclicBarrierEx {
         System.out.println("Adding animals - " + i);
     }
 
-    public void performTask(CyclicBarrier c1, CyclicBarrier c2) {
+    private void performTask(CyclicBarrier c1, CyclicBarrier c2) {
         removeAnimals();
         try {
+            System.out.println("c1.getNumberWaiting() = " + c1.getNumberWaiting());
             c1.await();
             cleanPen();
+            System.out.println("c1.getParties() = " + c1.getParties());
             c1.await();
         } catch (InterruptedException | BrokenBarrierException e) {
             e.printStackTrace();

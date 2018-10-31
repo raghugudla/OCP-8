@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ParallelStreamEx {
+
     public static void main(String[] args) {
         ParallelStreamEx calculator = new ParallelStreamEx();
         // Define the data
@@ -27,7 +28,7 @@ public class ParallelStreamEx {
                 .forEach(System.out::println);
     }
 
-    public int processRecord(int input) {
+    private int processRecord(int input) {
         try {
             Thread.sleep(1);
         } catch (InterruptedException e) {
@@ -36,7 +37,7 @@ public class ParallelStreamEx {
         return input + 1;
     }
 
-    public void processAllData(List<Integer> data) {
+    private void processAllData(List<Integer> data) {
         // Tasks completed in: 62.204 seconds
         // data.stream().map(a -> processRecord(a)).count();
 

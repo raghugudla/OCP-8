@@ -8,10 +8,11 @@ import java.util.Queue;
 public class ArrayDequeEx {
 
     public static void main(String[] args) {
+        test1();
         test2();
     }
 
-    public static void test2() {
+    private static void test2() {
 
         ArrayDeque<Integer> queue = new ArrayDeque<>();
 
@@ -34,6 +35,7 @@ public class ArrayDequeEx {
         for (int i = 0; i < 6; i++)
             System.out.println("poll: " + queue.poll());
         print(queue);
+        queue.pop();
     }
 
     private static void print(Queue<Integer> queue) {
@@ -41,7 +43,7 @@ public class ArrayDequeEx {
         System.out.println("----");
     }
 
-    public static void test1() {
+    private static void test1() {
 
         Map<Object, Object> map =
 //				new TreeMap<>(); --> NPE 

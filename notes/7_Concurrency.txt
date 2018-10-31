@@ -1,6 +1,8 @@
 Chapter 7: Concurrency
 ----------------------
 
+https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ExecutorService.html
+
 Introducing Runnable
 
 @FunctionalInterface public interface Runnable {
@@ -227,6 +229,10 @@ not cause a new structure to be allocated.
 Any iterator established prior to a modification will not see the
 changes, but instead it will iterate over the original elements prior to the modification.
 
+SkipList or SkipSet on the exam, just think “sorted” concurrent collections and the rest
+should follow naturally.
+
+----------------------------------
 Obtaining Synchronized Collections
 ----------------------------------
 

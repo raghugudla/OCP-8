@@ -11,7 +11,7 @@ public class RecursiveTaskEx extends RecursiveTask<Double> {
     private int end;
     private Double[] weights;
 
-    public RecursiveTaskEx(Double[] weights, int start, int end) {
+    private RecursiveTaskEx(Double[] weights, int start, int end) {
         this.start = start;
         this.end = end;
         this.weights = weights;
@@ -30,7 +30,9 @@ public class RecursiveTaskEx extends RecursiveTask<Double> {
                 d -> System.out.print(d.intValue() + " "));
     }
 
+    @Override
     protected Double compute() {
+        System.out.println("start = " + start + ", end = " + end);
         if (end - start <= 3) {
             double sum = 0;
             for (int i = start; i < end; i++) {
@@ -41,11 +43,12 @@ public class RecursiveTaskEx extends RecursiveTask<Double> {
             return sum;
         } else {
             int middle = start + ((end - start) / 2);
-            System.out.println("[start=" + start + ",middle=" + middle + ",end=" + end + "]");
             RecursiveTask<Double> otherTask = new RecursiveTaskEx(weights, start, middle);
             otherTask.fork();
+            System.out.println("start = " + start + ",middle = " + middle + " fork");
 
-            return new RecursiveTaskEx(weights, middle, end).compute() + otherTask.join();
+            return new RecursiveTaskEx(weights, middle, end).compute()
+                    + otherTask.join(); // Optional joining, just adding the sum in this UC
         }
     }
 }

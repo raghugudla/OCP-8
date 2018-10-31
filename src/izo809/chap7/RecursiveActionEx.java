@@ -11,7 +11,7 @@ public class RecursiveActionEx extends RecursiveAction {
     private int end;
     private Double[] weights;
 
-    public RecursiveActionEx(Double[] weights, int start, int end) {
+    private RecursiveActionEx(Double[] weights, int start, int end) {
         this.start = start;
         this.end = end;
         this.weights = weights;
@@ -25,11 +25,13 @@ public class RecursiveActionEx extends RecursiveAction {
         // Print results
         System.out.println();
         System.out.print("Weights: ");
-        Arrays.asList(weights).stream().forEach(
+        Arrays.stream(weights).forEach(
                 d -> System.out.print(d.intValue() + " "));
     }
 
+    @Override
     protected void compute() {
+        System.out.println("start = " + start + ", end = " + end);
         if (end - start <= 3)
             for (int i = start; i < end; i++) {
                 weights[i] = (double) new Random().nextInt(100);
@@ -37,7 +39,7 @@ public class RecursiveActionEx extends RecursiveAction {
             }
         else {
             int middle = start + ((end - start) / 2);
-            System.out.println("[start=" + start + ",middle=" + middle + ",end=" + end + "]");
+            System.out.println("middle = " + middle);
             invokeAll(new RecursiveActionEx(weights, start, middle), new RecursiveActionEx(weights, middle, end));
         }
     }
