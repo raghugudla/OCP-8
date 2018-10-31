@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.IntSummaryStatistics;
 import java.util.List;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class IntStreamEx {
 
@@ -49,8 +50,16 @@ public class IntStreamEx {
         range.forEach(System.out::println);
     }
 
+    private static void ex5() {
+
+        Stream<String> strings = Stream.of("1", "2");
+
+        strings.mapToInt(s -> s.length());
+        strings.forEach(System.out::println);
+    }
+
     public static void main(String[] args) {
-        ex4();
+        ex5();
     }
 
 }

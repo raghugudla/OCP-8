@@ -16,6 +16,6 @@ public class ComparatorEx implements Comparator<String> {
                 //a.toLowerCase().compareTo(b.toLowerCase()) -> 123 aab Abb
                 //a.compareTo(b) -> 123 Abb aab
                 //b.toLowerCase().compareTo(a.toLowerCase()) -> Abb aab 123
-        ;
+                ;
     }
 }

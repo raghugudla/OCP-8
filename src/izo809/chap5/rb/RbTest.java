@@ -27,6 +27,7 @@ public class RbTest {
                 .forEach(System.out::println);
 
         System.out.println("age: " + rb.getString("age"));
+        Locale.CHINA
     }
 
 }

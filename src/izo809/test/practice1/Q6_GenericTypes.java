@@ -5,7 +5,7 @@ public class Q6_GenericTypes<T, S> {
     private T t;
     private S s;
 
-    private Q6_GenericTypes( T t, S s) {
+    private Q6_GenericTypes(T t, S s) {
 
         this.t = t;
         this.s = s;
@@ -15,8 +15,8 @@ public class Q6_GenericTypes<T, S> {
         return new Q6_GenericTypes(u, u);
     }
 
-    public static void main(String[] args){
-        Q6_GenericTypes<String, String> obj = Q6_GenericTypes.<String>createTask("");
+    public static void main(String[] args) {
+        Q6_GenericTypes<String, String> obj = Q6_GenericTypes.createTask("");
 
         Q6_GenericTypes obj1 = new Q6_GenericTypes("", ""); // Raw Type
         Q6_GenericTypes<?, ?> obj2 = new Q6_GenericTypes("", "");

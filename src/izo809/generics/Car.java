@@ -19,7 +19,7 @@ public class Car extends Vehicle {
     }
 
     private static void meth1(List<? extends Vehicle> list) {
-        for(Vehicle v: list)
+        for (Vehicle v : list)
             System.out.println("vehicle = " + v);
     }
 
@@ -29,7 +29,7 @@ public class Car extends Vehicle {
     }
 
     private static void meth3(List<? extends Number> list) {
-        for(Number n: list)
+        for (Number n : list)
             n.byteValue();
     }
 

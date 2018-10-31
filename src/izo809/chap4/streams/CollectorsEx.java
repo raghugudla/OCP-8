@@ -48,7 +48,7 @@ public class CollectorsEx {
 
     }
 
-    private static void groupings(){
+    private static void groupings() {
         // groupingBy
 
         Stream<String> ohMy5 = Stream.of("lions", "tigers", "bears");
@@ -93,7 +93,7 @@ public class CollectorsEx {
 
         //mapping
 
-		Stream<String> ohMyC = Stream.of("lions", "tigers", "bears");
+        Stream<String> ohMyC = Stream.of("lions", "tigers", "bears");
         List<Character> collect = ohMyC.collect(
                 Collectors.mapping(s -> s.charAt(0), Collectors.toList())
         );

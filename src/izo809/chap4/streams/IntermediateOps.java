@@ -6,7 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class  IntermediateOps {
+public class IntermediateOps {
 
     public static void filter() {
         Stream<String> s = Stream.of("monkey", "gorilla", "bonobo");
@@ -88,6 +88,7 @@ public class  IntermediateOps {
         map();
         sorted();
         peek();
-*/    }
+*/
+    }
 
 }

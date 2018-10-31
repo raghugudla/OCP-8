@@ -16,6 +16,8 @@ public class FunctionalInterfaceTest {
         };
         new Thread(r).start();
         System.out.println("end of main");
+
+        Mother.statMeth();
     }
 
 }

@@ -13,7 +13,9 @@ public class TypeErasureEx {
 
         public T data;
 
-        public Node(T data) { this.data = data; }
+        public Node(T data) {
+            this.data = data;
+        }
 
         public void setData(T data) {
             System.out.println("Node.setData");
@@ -22,7 +24,9 @@ public class TypeErasureEx {
     }
 
     public static class MyNode extends Node<Integer> {
-        public MyNode(Integer data) { super(data); }
+        public MyNode(Integer data) {
+            super(data);
+        }
 
         public void setData(Integer data) {
             System.out.println("MyNode.setData");

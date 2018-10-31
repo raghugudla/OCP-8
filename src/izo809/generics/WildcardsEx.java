@@ -7,15 +7,15 @@ import java.util.Map;
 
 /**
  * List<?>
- *     List<? extends Number>
- *         List<? extends Integer>
- *             List<Integer>
- *
+ * List<? extends Number>
+ * List<? extends Integer>
+ * List<Integer>
+ * <p>
  * List<?>
- *     List<? super Integer>
- *         List<? super Number>
- *             List<Number>
- * */
+ * List<? super Integer>
+ * List<? super Number>
+ * List<Number>
+ */
 public class WildcardsEx {
 
     static void meth1(List<Number> numbers) {
@@ -30,7 +30,7 @@ public class WildcardsEx {
     static void meth3(List<? extends Number> numbers) {
         numbers.forEach(o -> o.doubleValue());
         //numbers.add(1);
-     }
+    }
 
     static void meth4(List<? super Number> numbers) {
         //numbers.forEach(o -> o.doubleValue);
@@ -74,7 +74,7 @@ public class WildcardsEx {
         /* ***************************************** */
         List<Integer> integers = new ArrayList<>();
         List<? extends Integer> intList = integers;
-        List<? extends Number>  numList = intList;  // OK. List<? extends Integer> is a subtype of List<? extends Number>
+        List<? extends Number> numList = intList;  // OK. List<? extends Integer> is a subtype of List<? extends Number>
         List<?> list = numList;
 //        list.add(2.0); // error
 
@@ -85,7 +85,7 @@ public class WildcardsEx {
         superInts = integers;
         numList = numbers;
 
-        List<? extends Number>  numList1 = new ArrayList<>();
+        List<? extends Number> numList1 = new ArrayList<>();
         //numList1.add(new Integer(1));
     }
 }

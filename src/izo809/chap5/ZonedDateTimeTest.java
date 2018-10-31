@@ -9,7 +9,7 @@ import java.time.temporal.ChronoUnit;
 public class ZonedDateTimeTest {
 
     private static void ex1() {
-        LocalDateTime localDateTime = LocalDateTime.of(2018,1,2,3,4,5);
+        LocalDateTime localDateTime = LocalDateTime.of(2018, 1, 2, 3, 4, 5);
         ZonedDateTime zdt = ZonedDateTime.of(localDateTime, ZoneId.of("CET"));
         System.out.println("zdt: " + zdt);
         System.out.println("1..." + zdt.withZoneSameInstant(ZoneId.of("Asia/Dhaka")));
@@ -22,7 +22,7 @@ public class ZonedDateTimeTest {
     }
 
     private static void ex2() {
-        LocalDateTime localDateTime = LocalDateTime.of(2018,10,28,2, 30);
+        LocalDateTime localDateTime = LocalDateTime.of(2018, 10, 28, 2, 30);
         System.out.println("localDateTime = " + localDateTime);
 
         ZonedDateTime zonedDateTime2a = ZonedDateTime.of(localDateTime, ZoneId.of("CET"));

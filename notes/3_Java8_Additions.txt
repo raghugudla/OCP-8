@@ -42,7 +42,7 @@ list.removeIf(s -> s.startsWith("A"));
 
 2) List.replaceAll
 ------------------
-default void	replaceAll(UnaryOperator<E> operator)
+default void replaceAll(UnaryOperator<E> operator)
 
 Replaces each element of this list with the result of applying the operator to that element.
 

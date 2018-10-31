@@ -1,0 +1,38 @@
+Chap 2: Introducing Functional Programming
+------------------------------------------
+
+The Java compiler implicitly assumes that any interface that contains exactly
+one abstract method is a functional interface.
+
+General Interfaces Notes
+------------------------
+
+1) If an interface inherits same static methods from two or more different parents, it's not an issue.
+static is related to class level.
+
+Father: static void sMeth()
+Mother: static void sMeth()
+Child ext Father and Mother.
+
+2) If an interface inherits same abstract methods from two or more different parents, it's not an issue.
+
+Father: void meth()
+Mother: void meth()
+Child ext Father and Mother.
+
+3) If an interface inherits same default methods from two or more different parents.
+
+You MUST override in the child.
+
+Father: default void deMeth()
+Mother: default void deMeth()
+Child ext Father and Mother: void deMeth()
+
+4) Mixed case, Child MUST override the default/abstract method
+
+Father: default void deMeth()
+Mother: static void deMeth()
+Child ext Father and Mother: void deMeth()
+
+
+

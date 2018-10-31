@@ -8,10 +8,11 @@ import java.util.function.Function;
 public class MapEx {
 
     public static void main(String[] args) {
-        putIfAbsent();
-        merge();
-        computeIfPresent();
-        computeIfAbsent();
+        //putIfAbsent();
+        //merge();
+        //computeIfPresent();
+        //computeIfAbsent();
+        compute();
     }
 
     private static void putIfAbsent() {
@@ -83,6 +84,28 @@ public class MapEx {
         System.out.println(jenny); // 1
         System.out.println(sam); // 3
         System.out.println(tom); // 3
+    }
+
+    private static void compute() {
+        Map<String, String> favorites = new HashMap<>();
+        favorites.put("Jenny", "Bus");
+        favorites.put("Tom", null);
+        favorites.put(null, "Bus");
+
+        BiFunction<String, String, String> mapper =
+                (v1, v2) -> {
+                    System.out.println("v1 = " + v1 + ", v2 = " + v2);
+                    return v1 + v2;
+                };
+
+        favorites.compute("Jenny", mapper);
+//        favorites.compute("Tom", mapper); //NPE
+//        favorites.compute(null, mapper);  NPE
+//        favorites.compute("Raghu", mapper);
+
+        System.out.println("compute: " + favorites);
+        System.out.println();
+        System.out.println("favorites = " + favorites.get(null));
     }
 
 }

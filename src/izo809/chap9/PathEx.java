@@ -58,7 +58,6 @@ public class PathEx {
             path = Paths.get("C:\\software\\temp.txt");
             System.out.println("toRealPath " + path.toRealPath());
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 

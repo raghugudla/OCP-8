@@ -29,6 +29,14 @@ public class GenericsTypeEx<T> {
         processStringList(Collections.emptyList());
     }
 
+    static <T> T pick(T a1, T a2) {
+        return a2;
+    }
+
+    static void processStringList(List<String> list) {
+
+    }
+
     @Override
     public String toString() {
         return t.toString();
@@ -36,11 +44,5 @@ public class GenericsTypeEx<T> {
 
     private <N extends Number> void inspect(N n) {
         System.out.println("argument class: " + n.getClass());
-    }
-
-    static <T> T pick(T a1, T a2) { return a2; }
-
-    static void processStringList(List<String> list) {
-
     }
 }

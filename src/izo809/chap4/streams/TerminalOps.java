@@ -110,15 +110,15 @@ public class TerminalOps {
         Stream<String> stream = Stream.of("w", "o", "l", "f");
         TreeSet<String> set = stream//.parallel()
                 .collect(TreeSet::new,
-                (a, b) -> {
-                    System.out.println(a + " -1- " + b);
-                    a.add(b);
-                },
-                (a, b) -> { // This part is called if the stream is parallel
-                    System.out.println(a + " .2. " + b);
-                    a.addAll(b);
-                }
-        );
+                        (a, b) -> {
+                            System.out.println(a + " -1- " + b);
+                            a.add(b);
+                        },
+                        (a, b) -> { // This part is called if the stream is parallel
+                            System.out.println(a + " .2. " + b);
+                            a.addAll(b);
+                        }
+                );
         System.out.println(set); // [f, l, o, w]
 
         Stream<String> stream1 = Stream.of("w", "o", "l", "f");
