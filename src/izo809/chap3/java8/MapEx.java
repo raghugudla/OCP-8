@@ -8,100 +8,93 @@ import java.util.function.Function;
 public class MapEx {
 
     public static void main(String[] args) {
-        //putIfAbsent();
-        //merge();
-        //computeIfPresent();
-        //computeIfAbsent();
+        putIfAbsent();
+        merge();
+        computeIfPresent();
+        computeIfAbsent();
         compute();
     }
 
     private static void putIfAbsent() {
         Map<String, String> favorites = new HashMap<>();
-        favorites.put("Jenny", "Bus Tour");
-        favorites.put("Tom", null);
-        favorites.put(null, "Bus");
+        favorites.put("A", "1");
+        favorites.put("B", null);
+        favorites.put(null, "3");
 
-        favorites.putIfAbsent("Jenny", "Tram");
-        favorites.putIfAbsent("Tom", "Tram");
-        favorites.putIfAbsent(null, "Tram");
-        favorites.putIfAbsent("Raghu", "Flight");
+        favorites.putIfAbsent("A", "1a");
+        favorites.putIfAbsent("B", "2");
+        favorites.putIfAbsent(null, "3a");
+        favorites.putIfAbsent("D", "4");
 
-        System.out.println("putIfAbsent: " + favorites); // {Tom=Tram, Raghu=Flight, Jenny=Bus Tour}
+        System.out.println("putIfAbsent: " + favorites); //{A=1, B=2, null=3, D=4}
         System.out.println();
     }
 
     private static void merge() {
         Map<String, String> favorites = new HashMap<>();
-        favorites.put("Jenny", "Bus");
-        favorites.put("Tom", null);
-        favorites.put(null, "Bus");
+        favorites.put("A", "1");
+        favorites.put("B", null);
+        favorites.put(null, "3");
 
         BiFunction<String, String, String> mapper =
-                (v1, v2) -> v1.length() > v2.length() ? v1 : v2;
+                (v1, v2) -> v2;
 
-        favorites.merge("Jenny", "Tram", mapper);
-        favorites.merge("Tom", "Metro", mapper); // No NPE
-        favorites.merge(null, "Metro", mapper); // No NPE
-        favorites.merge("Raghu", "Flight", mapper); // No NPE, BiFunction not being called
+        favorites.merge("A", "1a", mapper);
+        favorites.merge("B", "2", mapper); // No NPE
+        favorites.merge(null, "3a", mapper); // No NPE
+        favorites.merge("D", "4", mapper);
 
-        System.out.println("merge: " + favorites); // {Tom=Metro, Raghu=Flight, Jenny=Tram}
+        System.out.println("merge: " + favorites); //{A=1a, B=2, null=3a, D=4}
         System.out.println();
     }
 
     private static void computeIfPresent() {
         Map<String, Integer> counts = new HashMap<>();
-        counts.put("Jenny", 1);
-        counts.put("Tom", null);
+        counts.put("A", 1);
+        counts.put("B", null);
         counts.put(null, 3);
 
         BiFunction<String, Integer, Integer> mapper = (k, v) -> v + 1;
 
-        Integer jenny = counts.computeIfPresent("Jenny", mapper);
-        Integer sam = counts.computeIfPresent("Sam", mapper);
-        Integer tom = counts.computeIfPresent("Tom", mapper);
-        Integer n = counts.computeIfPresent(null, mapper);
+        System.out.println("A count : " + counts.computeIfPresent("A", mapper)); // 2
+        System.out.println("B count : " + counts.computeIfPresent("B", mapper)); // null
+        System.out.println("null count : " + counts.computeIfPresent(null, mapper)); // 4
+        System.out.println("D count : " + counts.computeIfPresent("D", mapper)); // null
 
-        System.out.println(counts); // {Tom=null, Jenny=2}
-        System.out.println(jenny); // 2
-        System.out.println(sam); // null
-        System.out.println(tom); // null
-        System.out.println(n); // 4
+        System.out.println("computeIfPresent : " + counts);
+        System.out.println();
     }
 
     private static void computeIfAbsent() {
         Map<String, Integer> counts = new HashMap<>();
-        counts.put("Jenny", 1);
-        counts.put("Tom", null);
-        counts.put(null, 3);
+        counts.put("A", 1);
+        counts.put("B", null);
+        counts.put(null, 1);
 
-        Function<String, Integer> mapper = k -> k.length();
+        Function<String, Integer> mapper = k -> k.length() + 1;
 
-        Integer jenny = counts.computeIfAbsent("Jenny", mapper);
-        Integer sam = counts.computeIfAbsent("Sam", mapper);
-        Integer tom = counts.computeIfAbsent("Tom", mapper);
+        System.out.println("A count : " + counts.computeIfAbsent("A", mapper)); // 1
+        System.out.println("B count : " + counts.computeIfAbsent("B", mapper)); // 2
+        System.out.println("null count : " + counts.computeIfAbsent(null, mapper)); // 1
+        System.out.println("D count : " + counts.computeIfAbsent("D", mapper)); // 2
 
-        System.out.println(counts); // {Tom=3, Jenny=1, Sam=3}
-        System.out.println(jenny); // 1
-        System.out.println(sam); // 3
-        System.out.println(tom); // 3
+        System.out.println("computeIfAbsent : " + counts);
+        System.out.println();
     }
 
     private static void compute() {
         Map<String, String> favorites = new HashMap<>();
-        favorites.put("Jenny", "Bus");
-        favorites.put("Tom", null);
-        favorites.put(null, "Bus");
+        favorites.put("A", "1");
+        favorites.put("B", null);
+        favorites.put(null, "3");
 
         BiFunction<String, String, String> mapper =
-                (v1, v2) -> {
-                    System.out.println("v1 = " + v1 + ", v2 = " + v2);
-                    return v1 + v2;
-                };
+                (v1, v2) -> v1 + "," + v2;
 
-        favorites.compute("Jenny", mapper);
-//        favorites.compute("Tom", mapper); //NPE
-//        favorites.compute(null, mapper);  NPE
-//        favorites.compute("Raghu", mapper);
+        favorites.compute("A", mapper); //A,1
+        favorites.compute("B", mapper); //B, null
+        favorites.compute(null, mapper); //null,3
+        favorites.compute("D", mapper); // D,null
 
         System.out.println("compute: " + favorites);
         System.out.println();

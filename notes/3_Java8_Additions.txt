@@ -63,6 +63,8 @@ Exceptions thrown by the action are relayed to the caller.
 Using New Java 8 Map APIs
 ######################################################
 
+NOTE: Null value in Map considered as ABSENT.
+
 1) Map.putIfAbsent
 ------------------
 default V	putIfAbsent(K key, V value)
