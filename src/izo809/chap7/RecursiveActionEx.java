@@ -21,7 +21,7 @@ public class RecursiveActionEx extends RecursiveAction {
         Double[] weights = new Double[10];
         ForkJoinTask<?> task = new RecursiveActionEx(weights, 0, weights.length);
         ForkJoinPool pool = new ForkJoinPool();
-        pool.invoke(task);
+        Object o = pool.invoke(task);
         // Print results
         System.out.println();
         System.out.print("Weights: ");

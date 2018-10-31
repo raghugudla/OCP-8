@@ -1,5 +1,6 @@
 package izo809.chap7;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -14,6 +15,8 @@ public class FixedThreadPoolEx {
             service = Executors.newFixedThreadPool(20);
 
             FixedThreadPoolEx manager = new FixedThreadPoolEx();
+
+            Callable<String> c = () -> "";
 
             for (int i = 0; i < 100; i++)
                 service.submit(() -> manager.incrementAndReport());
