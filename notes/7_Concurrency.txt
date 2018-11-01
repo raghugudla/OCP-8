@@ -596,6 +596,7 @@ try {
 
 If you attempt to release a lock that you do not have,
 you will get an exception at runtime in the form of an IllegalMonitorStateException
+
 Lock lock = new ReentrantLock();
 lock.unlock(); // Throws IllegalMonitorStateException at runtime
 

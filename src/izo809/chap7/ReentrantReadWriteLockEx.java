@@ -13,12 +13,14 @@ public class ReentrantReadWriteLockEx {
             service = Executors.newFixedThreadPool(20);
             service.submit(() -> {
                 readWriteLock.writeLock().lock(); // m2
-                System.out.println("Got Write Lock!");
+                System.out.println("Got Write Lock!" + Thread.currentThread().getName());
+                readWriteLock.writeLock().unlock(); // m2
             });
             for (int i = 0; i < 10; i++) {
                 service.submit(() -> {
                     readWriteLock.readLock().lock(); // m3
-                    System.out.println("Got Read Lock!");
+                    System.out.println("Got Read Lock! " + Thread.currentThread().getName());
+                    readWriteLock.readLock().unlock(); // m3
                 });
             }
         } finally {

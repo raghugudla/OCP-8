@@ -18,7 +18,11 @@ public class RecursiveTaskEx extends RecursiveTask<Double> {
 
     public static void main(String[] args) {
         Double[] weights = new Double[10];
+
         RecursiveTaskEx task = new RecursiveTaskEx(weights, 0, weights.length);
+//        ForkJoinTask<Double> task = new RecursiveTaskEx(weights, 0, weights.length);
+
+
         ForkJoinPool pool = new ForkJoinPool();
         Double sum = pool.invoke(task);
         System.out.println("Sum: " + sum);
@@ -46,8 +50,18 @@ public class RecursiveTaskEx extends RecursiveTask<Double> {
             otherTask.fork();
             System.out.println("start = " + start + ",middle = " + middle + " fork");
 
-            return new RecursiveTaskEx(weights, middle, end).compute()
-                    + otherTask.join(); // Optional joining, just adding the sum in this UC
+//            Double d1 = otherTask.join();
+//            System.out.println("d1 = " + d1);
+
+            Double d2 = new RecursiveTaskEx(weights, middle, end).compute();
+            System.out.println("d2 = " + d2);
+
+            // Join should be after calling the compute, otherwise, it will be single thread
+
+            Double d1 = otherTask.join();
+            System.out.println("d1 = " + d1);
+
+            return d1 + d2;
         }
     }
 }
