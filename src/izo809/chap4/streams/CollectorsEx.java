@@ -9,8 +9,8 @@ public class CollectorsEx {
     public static void main(String[] args) {
         //basics();
         //map();
-        //groupings();
-        partitions();
+        groupings();
+        //partitions();
     }
 
     private static void basics() {
@@ -59,6 +59,13 @@ public class CollectorsEx {
         Map<Integer, Set<String>> map6 =
                 ohMy6.collect(Collectors.groupingBy(String::length, Collectors.toSet()));
         System.out.println("8 " + map6);
+
+        //mapping
+        Stream<String> ohMyC = Stream.of("lions", "tigers", "bears");
+        List<Integer> collect = ohMyC.collect(
+                Collectors.mapping(String::length, Collectors.toList())
+        );
+        System.out.println("mapped collection = " + collect);
 
         Stream<String> ohMy7 = Stream.of("lions", "tigers", "bears");
         TreeMap<Integer, Set<String>> map7 =

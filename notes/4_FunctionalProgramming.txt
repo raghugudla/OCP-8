@@ -143,16 +143,18 @@ Collecting Results
 ------------------
 1) Calculates the average for our three core primitive types
 
-averagingDouble(ToDoubleFunction f)
-averagingInt(ToIntFunction f)
-averagingLong(ToLongFunction f)
+Double averagingDouble(ToDoubleFunction f)
+Double averagingInt(ToIntFunction f)
+Double averagingLong(ToLongFunction f)
 
 returns Double
 
 2) Counts number of elements
+
 Long counting()
 
 3) Grouping
+
 Map<K, List<T>> groupingBy(Function f)
 groupingBy(Function f, Collector dc)
 groupingBy(Function f, Supplier s, Collector dc)
