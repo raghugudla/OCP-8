@@ -1,12 +1,10 @@
-package izo809.test.diagnostic;
+package izo809.whizlabs.diagnostic;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
 
-public class Que2 {
+public class Que16 {
 
     public static void main(String... args) {
         List<Student> students = Arrays.asList(
@@ -16,14 +14,10 @@ public class Que2 {
                 new Student("D", "Engineering", 8.0)
         );
 
-        ToDoubleFunction<Student> markFunc = Student::getMark;
-
-        Map<String, List<Student>> stringListMap = students.stream()
-                .collect(Collectors.groupingBy(Student::getFaculty));
-
-        stringListMap
+        students.stream()
+                .collect(Collectors.toMap(Student::getFaculty, Student::getName))
                 .forEach(
-                        (a, b) -> System.out.println(a + "-" + b.stream().collect(Collectors.averagingDouble(markFunc)))
+                        (k, v) -> System.out.println(k + "-" + v)
                 );
     }
 
@@ -61,6 +55,13 @@ public class Que2 {
 
         public void setMark(double mark) {
             this.mark = mark;
+        }
+
+        @Override
+        public String toString() {
+            return "Student{" +
+                    "name='" + name + '\'' +
+                    '}';
         }
     }
 }

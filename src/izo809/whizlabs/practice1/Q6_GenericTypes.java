@@ -1,4 +1,4 @@
-package izo809.test.practice1;
+package izo809.whizlabs.practice1;
 
 
 public class Q6_GenericTypes<T, S> {

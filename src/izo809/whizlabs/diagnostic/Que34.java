@@ -1,36 +1,35 @@
-package izo809.test.diagnostic;
+package izo809.whizlabs.diagnostic;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Que16 {
+public class Que34 {
 
     public static void main(String... args) {
         List<Student> students = Arrays.asList(
-                new Student("A", "Business", 7.0),
-                new Student("B", "Business", 9.0),
-                new Student("C", "Engineering", 8.0),
-                new Student("D", "Engineering", 8.0)
+                new Student("A", "Business", "F"),
+                new Student("B", "Engineering", "F"),
+                new Student("C", "Business", "M"),
+                new Student("D", "Engineering", "M")
         );
 
-        students.stream()
-                .collect(Collectors.toMap(Student::getFaculty, Student::getName))
-                .forEach(
-                        (k, v) -> System.out.println(k + "-" + v)
-                );
+        System.out.println(
+                students.stream()
+                        .collect(Collectors.groupingBy(Student::getGender, Collectors.groupingBy(Student::getFaculty)))
+        );
     }
 
     static class Student {
         private String name;
         private String faculty;
-        private double mark;
+        private String gender;
 
-        Student(String name, String faculty, double mark) {
+        Student(String name, String faculty, String gender) {
 
             this.name = name;
             this.faculty = faculty;
-            this.mark = mark;
+            this.gender = gender;
         }
 
         public String getName() {
@@ -49,12 +48,8 @@ public class Que16 {
             this.faculty = faculty;
         }
 
-        public double getMark() {
-            return mark;
-        }
-
-        public void setMark(double mark) {
-            this.mark = mark;
+        public String getGender() {
+            return gender;
         }
 
         @Override

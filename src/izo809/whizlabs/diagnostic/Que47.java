@@ -1,4 +1,4 @@
-package izo809.test.diagnostic;
+package izo809.whizlabs.diagnostic;
 
 import java.time.*;
 

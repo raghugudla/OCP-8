@@ -5,10 +5,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
+import java.time.Instant;
 
-public class FileAttributesEx {
+public class FilesAttributesEx {
 
-    public static void commonAttributes() {
+    private static void commonAttributes() {
         // If dir not exist no exception thrown
         System.out.println("isDirectory " + Files.isDirectory(Paths.get("/canine/coyote/fur.jpg")));
         System.out.println("isRegularFile " + Files.isRegularFile(Paths.get("/canine/types.txt")));
@@ -21,7 +22,7 @@ public class FileAttributesEx {
         System.out.println();
     }
 
-    public static void advancedAttributes() throws IOException {
+    private static void advancedAttributes() throws IOException {
         // isHidden() throws exception if file/dir not found
         System.out.println("isReadable " + Files.isReadable(Paths.get("/canine/types.txt")));
         System.out.println("isExecutable " + Files.isExecutable(Paths.get("/canine/coyote")));
@@ -38,28 +39,28 @@ public class FileAttributesEx {
         System.out.println();
     }
 
-    public static void modifiedTime() throws IOException {
-        final Path path = Paths.get("./src/izo809/chap9/FileAttributesEx.java");
+    private static void modifiedTime() throws IOException {
+        final Path path = Paths.get("./src/izo809/chap9/FilesAttributesEx.java");
         System.out.println("1.LastModifiedTime " + Files.getLastModifiedTime(path));
         System.out.println("2.LastModifiedTime " + Files.getLastModifiedTime(path).toMillis());
-        Files.setLastModifiedTime(path, FileTime.fromMillis(System.currentTimeMillis()));
+        Files.setLastModifiedTime(path, FileTime.from(Instant.now()));
         System.out.println("3.LastModifiedTime " + Files.getLastModifiedTime(path));
         System.out.println("4.LastModifiedTime " + Files.getLastModifiedTime(path).toMillis());
         System.out.println();
     }
 
-    public static void owner() throws IOException {
-        final Path path = Paths.get("src/izo809/chap9/FileAttributesEx.java");
+    private static void owner() throws IOException {
+        final Path path = Paths.get("src/izo809/chap9/FilesAttributesEx.java");
         System.out.println("owner " + Files.getOwner(path));
         System.out.println("owner name " + Files.getOwner(path).getName());
         System.out.println();
     }
 
     public static void main(String[] args) throws IOException {
-		/*
 		commonAttributes();
 		advancedAttributes();
 		modifiedTime();
+        /*
 		 * */
         owner();
     }

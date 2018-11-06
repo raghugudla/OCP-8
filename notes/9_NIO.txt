@@ -37,7 +37,7 @@ The second example creates a Path reference to an absolute file in a Windows-bas
 system. The third example creates a Path reference to an absolute directory in a Linux or
 Mac-based system.
 
-most JVM implementations support both forward and backward slashes regardless of the
+Most JVM implementations support both forward and backward slashes regardless of the
 file system, allowing the same code to run on multiple operating systems without having to
 rewrite the slashes.
 
@@ -81,22 +81,29 @@ Interacting with Paths and Files
 
 Common optional arguments in NIO.2
 ----------------------------------
-NOFOLLOW_LINKS Test file existing Read file data Copy file Move file
+NOFOLLOW_LINKS
+Usage: Test file existing Read file data Copy file Move file
 If provided, symbolic links when encountered will not be traversed. 
 Useful for performing operations on symbolic links themselves rather than their target.
 
-FOLLOW_LINKS Traverse a directory tree 
+FOLLOW_LINKS
+Usage: Traverse a directory tree
 If provided, symbolic links when encountered will be traversed.
 
-COPY_ATTRIBUTES Copy file If provided, all metadata about a file will be copied with it.
+COPY_ATTRIBUTES
+Usage: Copy file
+If provided, all metadata about a file will be copied with it.
 
-REPLACE_EXISTING Copy file Move file
+REPLACE_EXISTING
+Usage: Copy file Move file
 If provided and the target file exists, it will be replaced; otherwise, if it is not provided,
 an exception will be thrown if the file already exists.
 
-ATOMIC_MOVE Move file The operation is performed in an atomic manner
-within the file system, ensuring that any process using the file sees only a complete
-record. Method using it may throw an exception if the feature is unsupported by the file system.
+ATOMIC_MOVE
+Usage: Move file
+The operation is performed in an atomic manner within the file system,
+ensuring that any process using the file sees only a complete record.
+Method using it may throw an exception if the feature is unsupported by the file system.
 If the file system does not support this feature, an AtomicMoveNotSupportedException will be thrown.
 
 the Path.getName(int) method is zero-indexed, with the file system root excluded from the path
@@ -206,25 +213,26 @@ Interacting with Files
 =========================================================
 
 Unlike the methods in the Path and
-Paths class, most of the options within the Files class will throw an exception if the fi le to
-which the Path refers does not exist.
+Paths class, most of the options within the Files class will throw an exception if
+the file to which the Path refers does not exist.
 
-Be wary of File vs. Files on the exam
-the NIO.2 Files helper class is
+Be wary of File vs. Files on the exam2 the NIO.2 Files helper class is
 in no way related to the File class, as the Files class operates on Path instances, not
 File instances. Keep in mind that File belongs to the legacy java.io API, while Files
 belongs to the NIO.2 API.
 
-The Files class contains numerous static methods for interacting with fi les, with most
+The Files class contains numerous static methods for interacting with files, with most
 taking one or two Path objects as arguments.
 
 Testing a Path with exists()
 ----------------------------
 Files.exists(Paths.get("/ostrich/feathers.png"));
 Files.exists(Paths.get("/ostrich"));
-The fi rst example checks whether a fi le exists, while the second example checks whether a
-directory exists. You can see that this method does not throw an exception if the fi le does not
+The fi rst example checks whether a file exists, while the second example checks whether a
+directory exists. You can see that this method does not throw an exception if the file does not
 exist
+
+By default, symbolic links are followed. If the option NOFOLLOW_LINKS is present then symbolic links are not followed.
 
 Testing Uniqueness with isSameFile()
 ------------------------------------
@@ -248,13 +256,13 @@ like mkdirs() creates the target directory along with any nonexistent parent dir
 leading up to the target directory in the path.
 
 createDirectory will throw exception if the directory already exists
-createDirectories doen't throw exception if the directories are already exist
+createDirectories doesn't throw exception if the directories are already exist
 
 Duplicating File Contents with copy()
 -------------------------------------
-Files.copy(Path,Path) , which copies a
-file or directory from one location to another. The copy() method throws the checked
-IOException , such as when the file or directory does not exist or cannot be read.
+Files.copy(Path,Path) , which copies a file or directory from one location to another.
+The copy() method throws the checked IOException ,
+such as when the file or directory does not exist or cannot be read.
 
 Directory copies are shallow rather than deep, meaning that files and subdirectories
 within the directory are not copied.
@@ -285,37 +293,37 @@ Files.copy(Paths.get("c:\\fish\\clown.xsl"), out);
 
 Changing a File Location with move()
 ------------------------------------
-The Files.move(Path,Path) method moves or renames a fi le or directory within the fi le
-system. Like the copy() method, the move() method also throws the checked IOException
-in the event that the fi le or directory could not be found or moved.
+The Files.move(Path,Path) method moves or renames a file or directory within the file system.
+Like the copy() method, the move() method also throws the checked IOException
+in the event that the file or directory could not be found or moved.
 
 Files.move(Paths.get("c:\\zoo"), Paths.get("c:\\zoo-new"));
-Files.move(Paths.get("c:\\user\\addresses.txt"),
-Paths.get("c:\\zoo-new\\addresses.txt"));
+Files.move(Paths.get("c:\\user\\addresses.txt"), Paths.get("c:\\zoo-new\\addresses.txt"));
 } catch (IOException e) {
 // Handle file I/O exception...
 }
 
 moving an empty directory across a drive is supported, 
-moving a non-empty directory across a drive
-will throw an NIO.2 DirectoryNotEmptyException .
+moving a non-empty directory across a drive will throw an NIO.2 DirectoryNotEmptyException .
 
-By default, the move() method will follow links, throw an exception if the fi le
-already exists, and not perform an atomic move. These behaviors can be changed by
+By default, the move() method will follow links, throw an exception if the file already exists,
+and not perform an atomic move. These behaviors can be changed by
 providing the optional values NOFOLLOW_LINKS , REPLACE_EXISTING , or ATOMIC_MOVE ,
-respectively, to the method. If the fi le system does not support atomic moves, an
+respectively, to the method. If the file system does not support atomic moves, an
 AtomicMoveNotSupportedException will be thrown at runtime.
 
 Removing a File with delete() and deleteIfExists()
 --------------------------------------------------
-The Files.delete(Path) method deletes a fi le or empty directory within the fi le system.
+The Files.delete(Path) method deletes a file or empty directory within the file system.
+
 The delete() method throws the checked IOException under a variety of circumstances.
 For example, if the path represents a non-empty directory, the operation will throw the
 runtime DirectoryNotEmptyException . If the target of the path is a symbol link, then the
 symbolic link will be deleted, not the target of the link.
+
 The deleteIfExists(Path) method is identical to the delete(Path) method, except
-that it will not throw an exception if the fi le or directory does not exist, but instead it will
-return a boolean value of false . It will still throw an exception if the fi le or directory does
+that it will not throw an exception if the file or directory does not exist, but instead it will
+return a boolean value of false . It will still throw an exception if the file or directory does
 exist but fails, such as in the case of the directory not being empty.
 
 Reading and Writing File Data with newBufferedReader() and
