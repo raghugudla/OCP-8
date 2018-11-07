@@ -8,16 +8,16 @@ method parameters, and effectively final local variables.
 
 Common Functional Interfaces
 ----------------------------
-Interface   Parameters  Return type Method
-Supplier<T>     0           T        get
-Consumer<T>     1         void      accept
-BiConsumer<T, U> 2        void      accept
-Predicate<T>    1         boolean   test
-BiPredicate<T, U> 2       boolean   test
-Function<T, R>  1 T       R         apply
-BiFunction<T, U, R>  2 T,U   R      apply
-UnaryOperator<T>  1       T         apply
-BinaryOperator<T, T>  2   T         apply
+Interface           Parameters  Return type Method
+Supplier<T>             0       T           get
+Consumer<T>             1       void        accept
+BiConsumer<T, U>        2       void        accept
+Predicate<T>            1       boolean     test
+BiPredicate<T, U>       2       boolean     test
+Function<T, R>          1 T       R         apply
+BiFunction<T, U, R>     2 T,U     R         apply
+UnaryOperator<T>        1 T       T         apply
+BinaryOperator<T, T>    2 T       T         apply
 
 Function<String, Integer> f1 = String::length;
 Function<String, Integer> f2 = x -> x.length();

@@ -22,9 +22,10 @@ public class WildcardsEx {
 
     }
 
-    static <N extends Number> void meth2(List<N> numbers) {
+    static <N extends Number> List<N> meth2(List<N> numbers) {
         numbers.forEach(o -> o.doubleValue());
         //numbers.add(1);
+        return numbers;
     }
 
     static void meth3(List<? extends Number> numbers) {

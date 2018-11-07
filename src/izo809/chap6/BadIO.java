@@ -10,23 +10,26 @@ public class BadIO {
 
         try {
 
-            bad.fileBlowUp();
+            //bad.fileBlowUp();
             bad.dbBlowUp();
-
-        } catch (IOException e) {
-
-            e.printStackTrace();
 
         } catch (Exception e) {
 
             e.printStackTrace();
 
+            Throwable[] throwables = e.getSuppressed();
+            for (Throwable t : throwables)
+                System.out.println("t = " + t);
         }
 
     }
 
-    void dbBlowUp() throws SQLException {
-        throw new SQLException();
+    void dbBlowUp() {
+        try {
+            throw new SQLException();
+        } finally {
+            throw new RuntimeException();
+        }
     }
 
     void fileBlowUp() throws IOException {

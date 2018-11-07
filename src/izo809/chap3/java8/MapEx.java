@@ -21,10 +21,10 @@ public class MapEx {
         favorites.put("B", null);
         favorites.put(null, "3");
 
-        favorites.putIfAbsent("A", "1a");
-        favorites.putIfAbsent("B", "2");
-        favorites.putIfAbsent(null, "3a");
-        favorites.putIfAbsent("D", "4");
+        System.out.println("favorites.putIfAbsent(\"A\", \"1a\") = " + favorites.putIfAbsent("A", "1a"));
+        System.out.println("favorites.putIfAbsent(\"B\", \"2\") = " + favorites.putIfAbsent("B", "2"));
+        System.out.println("favorites.putIfAbsent(null, \"3a\") = " + favorites.putIfAbsent(null, "3a"));
+        System.out.println("favorites.putIfAbsent(\"D\", \"4\") = " + favorites.putIfAbsent("D", "4"));
 
         System.out.println("putIfAbsent: " + favorites); //{A=1, B=2, null=3, D=4}
         System.out.println();
@@ -89,7 +89,10 @@ public class MapEx {
         favorites.put(null, "3");
 
         BiFunction<String, String, String> mapper =
-                (v1, v2) -> v1 + "," + v2;
+                (v1, v2) -> {
+                    System.out.println("v1 = " + v1 + ", v2 = " + v2);
+                    return v2;
+                };
 
         favorites.compute("A", mapper); //A,1
         favorites.compute("B", mapper); //B, null
